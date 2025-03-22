@@ -3,10 +3,12 @@ use anchor_lang::prelude::*;
 pub mod errors;
 pub mod instructions;
 pub mod state;
+pub mod constants;
+pub mod utils;
 
 use instructions::*;
 
-declare_id!("C2z2TEKjwfbQ2WsHVHofbUAFKQ5GpSixdwfiT6GswwbV");
+declare_id!("8yWrExW5JBiiLC9HweTqudzvo4fRDMc4FCNSKChz6tGd");
 
 #[program]
 pub mod nomadz_core {

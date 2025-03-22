@@ -23,7 +23,6 @@ pub struct UpdateConfig<'info> {
     #[account(mut)]
     pub config: Account<'info, Config>,
 
-    /// CHECK: account constraints checked in account trait
     pub admin: Signer<'info>,
 
     /// CHECK: account constraints checked in account trait

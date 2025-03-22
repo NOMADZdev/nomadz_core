@@ -1,4 +1,4 @@
-use crate::state::config::config::Config;
+use crate::{constants::*, errors::InitializeErrorCode, state::config::config::Config, utils::*};
 use anchor_lang::prelude::*;
 
 pub fn initialize_handler(ctx: Context<Initialize>) -> Result<()> {
@@ -17,7 +17,7 @@ pub struct Initialize<'info> {
     #[account(init, payer = creator, seeds = [b"config"], space = Config::LEN, bump)]
     pub config: Account<'info, Config>,
 
-    #[account(mut)]
+    #[account(mut, constraint = contains_address(&ALLOWED_INITIALIZE_PROGRAM_AUTHORITIES, &creator.key()) @ InitializeErrorCode::Forbidden)]
     pub creator: Signer<'info>,
 
     /// CHECK: account constraints checked in account trait
