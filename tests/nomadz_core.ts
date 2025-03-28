@@ -7,8 +7,10 @@ import {
   PublicKey,
   sendAndConfirmTransaction,
   SystemProgram,
+  SYSVAR_RENT_PUBKEY,
 } from '@solana/web3.js';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
+import { TOKEN_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
 
 describe('nomadz_core', () => {
   // Configure the client to use the local cluster
@@ -63,7 +65,7 @@ describe('nomadz_core', () => {
         .initialize()
         .accounts({
           config: configPda,
-          creator: wallet.publicKey,
+          initializer: wallet.publicKey,
           admin: new PublicKey('EDFVK31PPpHM7nnv6NUSMTGko46v1u5j8TXnXje1CMPw'),
           systemProgram: SystemProgram.programId,
         })
@@ -107,5 +109,44 @@ describe('nomadz_core', () => {
     const accountInfo = await program.account.config.fetch(configPda);
 
     console.log(accountInfo);
+  });
+
+  it('Soulbound NFT was minted!', async () => {
+    const assetAccount = Keypair.generate();
+    const mplTokenMetadataProgramId = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
+    const mplCoreProgramId = new PublicKey('CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d');
+    const [metadataAccount] = PublicKey.findProgramAddressSync(
+      [Buffer.from('metadata'), TOKEN_PROGRAM_ID.toBytes(), assetAccount.publicKey.toBytes()],
+      mplTokenMetadataProgramId,
+    );
+
+    const tx = await program.methods
+      .mintSoulboundNft({ uri: '', name: 'My Test NFT' })
+      .accounts({
+        assetAccount: assetAccount.publicKey,
+        metadataAccount: metadataAccount,
+        user: wallet.publicKey,
+        nomadzProgram: program.programId,
+        mplCoreProgram: mplCoreProgramId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: mplTokenMetadataProgramId,
+        systemProgram: SystemProgram.programId,
+        rent: SYSVAR_RENT_PUBKEY,
+      })
+      .transaction();
+
+    const signer = Keypair.fromSecretKey(
+      bs58.decode(
+        '4NodMZEtDcQrYKzzJzaFtATZK6yqmZnNbGvESfBdZkSTKvME44xEikda35k8WerLgxqKS9AE72neLZqWEf3A5kyo',
+      ),
+    );
+
+    const signature = await sendAndConfirmTransaction(connection, tx, [
+      signer,
+      assetAccount,
+      wallet,
+    ]);
+
+    console.log('Your transaction signature', signature);
   });
 });
