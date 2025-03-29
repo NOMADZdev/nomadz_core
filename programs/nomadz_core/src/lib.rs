@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-// use anchor_spl:
 
 pub mod constants;
 pub mod errors;
@@ -9,7 +8,7 @@ pub mod utils;
 
 use instructions::*;
 
-declare_id!("818jhPG7nGagquKwx1cfpiX3M68TxnGwgw2KP3rE3Rd8");
+declare_id!("GR9vV91P5kEvi9qvvBV2Cgirk4jeCkTHabbberzg8UVo");
 
 #[program]
 pub mod nomadz_core {
