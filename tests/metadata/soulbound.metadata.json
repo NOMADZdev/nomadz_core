@@ -1,0 +1,39 @@
+{
+  "name": "NOMADZ Soulbound",
+  "symbol": "NOMADZSB",
+  "description": "The NOMADZ soulbound NFT",
+  "image": "https://bafybeid2v2un5eziph75p4h2l3pykxnlrgde5gu6blzxs2nun5sryutmpe.ipfs.dweb.link/",
+  "animation_url": "https://bafybeihvydpbj2h7qabs6fbklwnbt2ltbrekvjpqupquvizubm4xeb5nam.ipfs.dweb.link/",
+  "external_url": "https://nomadz.xyz",
+  "properties": {
+    "files": [
+      {
+        "uri": "https://bafybeid2v2un5eziph75p4h2l3pykxnlrgde5gu6blzxs2nun5sryutmpe.ipfs.dweb.link/",
+        "type": "image/png"
+      },
+      {
+        "uri": "https://bafybeihvydpbj2h7qabs6fbklwnbt2ltbrekvjpqupquvizubm4xeb5nam.ipfs.dweb.link/",
+        "type": "video/mp4"
+      }
+    ],
+    "category": "image"
+  },
+  "attributes": [
+    {
+      "traitType": "Level",
+      "value": "0"
+    },
+    {
+      "traitType": "Experience",
+      "value": "0"
+    },
+    {
+      "traitType": "Luck",
+      "value": "0"
+    },
+    {
+      "traitType": "Discount",
+      "value": "0"
+    }
+  ]
+}
