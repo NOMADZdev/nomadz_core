@@ -7,6 +7,7 @@ import {
   PublicKey,
   sendAndConfirmTransaction,
   SystemProgram,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
   SYSVAR_RENT_PUBKEY,
 } from '@solana/web3.js';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
@@ -135,6 +136,16 @@ describe('nomadz_core', () => {
       mplTokenMetadataProgramId,
     );
 
+    const [masterEditionAccount] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from('metadata'),
+        mplTokenMetadataProgramId.toBytes(),
+        assetAccount.toBytes(),
+        Buffer.from('edition'),
+      ],
+      mplTokenMetadataProgramId,
+    );
+
     const [assetAuthority] = PublicKey.findProgramAddressSync(
       [Buffer.from('asset_authority'), program.programId.toBytes(), assetAccount.toBytes()],
       program.programId,
@@ -166,25 +177,64 @@ describe('nomadz_core', () => {
         nomadzProgram: program.programId,
         mplCoreProgram: mplCoreProgramId,
         tokenProgram: TOKEN_PROGRAM_ID,
+        masterEditionAccount: masterEditionAccount,
         mplTokenMetadataProgram: mplTokenMetadataProgramId,
         systemProgram: SystemProgram.programId,
         rent: SYSVAR_RENT_PUBKEY,
+        sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
       })
       .transaction();
-
-    // const signer = Keypair.fromSecretKey(
-    //   bs58.decode(
-    //     '4NodMZEtDcQrYKzzJzaFtATZK6yqmZnNbGvESfBdZkSTKvME44xEikda35k8WerLgxqKS9AE72neLZqWEf3A5kyo',
-    //   ),
-    // );
 
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
     tx.recentBlockhash = blockhash;
     tx.feePayer = wallet.publicKey;
     tx.lastValidBlockHeight = lastValidBlockHeight;
     console.log(tx.serializeMessage().toString('base64'));
-    // const signature = await sendAndConfirmTransaction(connection, tx, [wallet]);
+    const signature = await sendAndConfirmTransaction(connection, tx, [wallet]);
 
-    // console.log('Your transaction signature', signature);
+    console.log('Your transaction signature', signature);
+  });
+
+  it('Soulbound NFT was updated!', async () => {
+    const [assetAccount] = PublicKey.findProgramAddressSync(
+      [Buffer.from('soulbound_asset'), Buffer.from('aboba1488'), program.programId.toBytes()],
+      program.programId,
+    );
+
+    const [assetAuthority] = PublicKey.findProgramAddressSync(
+      [Buffer.from('asset_authority'), program.programId.toBytes(), assetAccount.toBytes()],
+      program.programId,
+    );
+
+    const newMetadata = {
+      ...defaultSoulboundMetadataJson,
+      attributes: defaultSoulboundMetadataJson.attributes.map(attribute =>
+        attribute.traitType === 'Discount' ? { ...attribute, value: '50' } : attribute,
+      ),
+    };
+
+    const metadataUpload = await pinata.upload.json(newMetadata);
+    const uri = `https://${metadataUpload.IpfsHash}.ipfs.dweb.link/`;
+
+    const tx = await program.methods
+      .updateSoulboundNft({ newUri: uri, userId: 'aboba1488' })
+      .accounts({
+        assetAccount: assetAccount,
+        assetAuthority: assetAuthority,
+        user: wallet.publicKey,
+        nomadzProgram: program.programId,
+        mplCoreProgram: mplCoreProgramId,
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = wallet.publicKey;
+    tx.lastValidBlockHeight = lastValidBlockHeight;
+    console.log(tx.serializeMessage().toString('base64'));
+    const signature = await sendAndConfirmTransaction(connection, tx, [wallet]);
+
+    console.log('Your transaction signature', signature);
   });
 });
