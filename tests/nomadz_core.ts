@@ -34,9 +34,8 @@ describe("nomadz_core", () => {
   );
 
   const pinata = new PinataSDK({
-    pinataJwt:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI2ZThlNjQzYi1hMWY5LTRmYzUtOTNjZS1mMWY1MTg1ZmNiYmYiLCJlbWFpbCI6InNoYXJvdmlraW1hZ0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiMTFlZDI3MzQ1NDQxYTY5ZmU2MzMiLCJzY29wZWRLZXlTZWNyZXQiOiJkOWM4YTM1Mjg0ZDgyYTQ3ZTUyMTI3N2QyNTY5YTFjZTEzOGVkMTZiMDgwZmQ3NTQ4ZTE1ZjM1Yzg1YzU5ZjE3IiwiZXhwIjoxNzcwMDYyODYxfQ.Ly-YAu1zKKgC8utJnN3jvqYHtB0yDWVFCEwblAuZ8Ec",
-    pinataGateway: "amaranth-payable-horse-854.mypinata.cloud",
+    pinataJwt: process.env.PINATA_JWT || "",
+    pinataGateway: process.env.PINATA_GATEWAY || "",
   });
 
   const program = anchor.workspace.nomadzCore as Program<NomadzCore>;
