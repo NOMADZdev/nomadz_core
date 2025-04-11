@@ -1,21 +1,20 @@
 [toolchain]
+channel = "1.85.1"
+components = ["rustfmt", "clippy"]
 
 [features]
 seeds = false
 skip-lint = false
 
-[programs.devnet]
-nomadz_core = "5HgPxgqHnwim6mJsPbCVnNP1B43Wog9pNFsGsoaXRd8S"
-
 [programs.localnet]
-nomadz_core = "5HgPxgqHnwim6mJsPbCVnNP1B43Wog9pNFsGsoaXRd8S"
+nomadz_core = "4ihvsitihvKBiSm44MWtTWWdKZeadtM5g24P1vRSbDrm"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
-wallet = "/Users/kalyonekenobe/.config/solana/id.json"
+cluster = "Localnet"
+wallet = "/Users/petroyaremenko/.config/solana/id.json"
 
 [scripts]
 test = "yarn ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
@@ -24,3 +23,15 @@ test = "yarn ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 startup_wait = 5000
 shutdown_wait = 2000
 upgradeable = false
+
+[test.validator]
+bind_address = "0.0.0.0"
+url = "https://api.mainnet-beta.solana.com"
+ledger = ".anchor/test-ledger"
+rpc_port = 8899
+
+[[test.validator.clone]]
+address = "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+
+[[test.validator.clone]]
+address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"

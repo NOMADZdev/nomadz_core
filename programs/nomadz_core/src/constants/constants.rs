@@ -1,12 +1,8 @@
+use std::str::FromStr;
+
 use anchor_lang::prelude::Pubkey;
 
-pub const ALLOWED_INITIALIZE_PROGRAM_AUTHORITIES: [Pubkey; 2] = [
-    Pubkey::new_from_array([
-        157, 15, 191, 104, 101, 254, 30, 19, 101, 176, 6, 224, 166, 148, 255, 53, 30, 165, 34, 209,
-        140, 239, 194, 103, 173, 4, 207, 204, 239, 214, 73, 47,
-    ]),
-    Pubkey::new_from_array([
-        8, 223, 86, 82, 53, 222, 6, 133, 203, 195, 191, 149, 40, 82, 26, 120, 23, 27, 37, 42, 131,
-        194, 87, 63, 202, 148, 20, 213, 245, 72, 35, 61,
-    ]),
-];
+pub const ALLOWED_INITIALIZE_PROGRAM_AUTHORITIES: [Pubkey; 1] = [Pubkey::new_from_array([
+    174, 97, 150, 139, 136, 66, 147, 20, 214, 207, 91, 3, 116, 19, 43, 72, 200, 154, 168, 9, 210,
+    28, 105, 133, 216, 36, 169, 30, 13, 95, 72, 103,
+])];
