@@ -8,7 +8,7 @@ pub mod utils;
 
 use instructions::*;
 
-declare_id!("5HgPxgqHnwim6mJsPbCVnNP1B43Wog9pNFsGsoaXRd8S");
+declare_id!("8Q1kAGiGHSoePsmKWA4Vf8k2nazRHNz5su6jEzYjaUx5");
 
 #[program]
 pub mod nomadz_core {
@@ -24,14 +24,14 @@ pub mod nomadz_core {
 
     pub fn mint_soulbound_nft(
         ctx: Context<MintSoulboundNFT>,
-        data: MintSoulboundNFTArgs
+        data: MintSoulboundNFTArgs,
     ) -> Result<()> {
         instructions::soulbound::mint_soulbound_nft::mint_soulbound_nft_handler(ctx, data)
     }
 
     pub fn update_soulbound_nft(
         ctx: Context<UpdateSoulboundNFT>,
-        data: UpdateSoulboundNFTArgs
+        data: UpdateSoulboundNFTArgs,
     ) -> Result<()> {
         instructions::soulbound::update_soulbound_nft::update_soulbound_nft_handler(ctx, data)
     }

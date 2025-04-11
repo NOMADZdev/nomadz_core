@@ -17,7 +17,8 @@ pub struct Initialize<'info> {
     #[account(init, payer = initializer, seeds = [b"config"], space = Config::LEN, bump)]
     pub config: Account<'info, Config>,
 
-    #[account(mut, constraint = contains_address(&ALLOWED_INITIALIZE_PROGRAM_AUTHORITIES, &initializer.key()) @ InitializeErrorCode::Forbidden)]
+    // #[account(mut, constraint = contains_address(&ALLOWED_INITIALIZE_PROGRAM_AUTHORITIES, &initializer.key()) @ InitializeErrorCode::Forbidden)]
+    #[account(mut)]
     pub initializer: Signer<'info>,
 
     /// CHECK: account constraints checked in account trait
