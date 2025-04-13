@@ -1,5 +1,5 @@
 [package]
-name = "nomadz_core"
+name = "nomadz-core"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
@@ -19,7 +19,7 @@ anchor-debug = []
 
 [dependencies]
 solana-program = "1.16.5"
-anchor-lang = "0.29.0"
+anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
 mpl-candy-machine-core = "3.0.1"
 mpl-core = "0.9.1"
 spl-token = "4.0.0"
