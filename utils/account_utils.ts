@@ -7,7 +7,7 @@ import { dirname } from "path";
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = dirname(__filename);
 
-const accountsFilePath = path.join(__dirname, "../../accounts.json");
+const accountsFilePath = path.join(__dirname, "./accounts.json");
 /**
  * Save an account to accounts.json.
  * @param key - The key to store the account under.
