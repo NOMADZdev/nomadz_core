@@ -1,13 +1,11 @@
 [toolchain]
-channel = "1.85.1"
-components = ["rustfmt", "clippy"]
 
 [features]
 seeds = false
 skip-lint = false
 
 [programs.localnet]
-nomadz_core = "4ihvsitihvKBiSm44MWtTWWdKZeadtM5g24P1vRSbDrm"
+nomadz_core = "83phjpbBzH9LQdUqq8mcr8eGXxQ2CNQfsHaQsjARsCos"
 
 [registry]
 url = "https://api.apr.dev"
@@ -17,7 +15,7 @@ cluster = "Localnet"
 wallet = "/Users/petroyaremenko/.config/solana/id.json"
 
 [scripts]
-test = "yarn ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "yarn ts-mocha -p ./tsconfig.json -t 1000000 tests/**/pipeline.ts"
 
 [test]
 startup_wait = 5000

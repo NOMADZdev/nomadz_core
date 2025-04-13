@@ -1,15 +1,23 @@
 use anchor_lang::prelude::*;
-use anchor_spl::{ metadata::{ mpl_token_metadata::{ self }, Metadata }, token::Token };
+use anchor_spl::{
+    metadata::{
+        mpl_token_metadata::{self},
+        Metadata,
+    },
+    token::Token,
+};
 use mpl_core::{
     instructions::CreateV2CpiBuilder,
-    types::{ FreezeDelegate, Plugin, PluginAuthorityPair },
+    types::{FreezeDelegate, Plugin, PluginAuthorityPair},
 };
 
 use crate::errors::MintSoulboundNftErrorCode;
 
+use crate::state::soulbound::asset_data::UserAssetData;
+
 pub fn mint_soulbound_nft_handler(
     ctx: Context<MintSoulboundNFT>,
-    args: MintSoulboundNFTArgs
+    args: MintSoulboundNFTArgs,
 ) -> Result<()> {
     let MintSoulboundNFTArgs { uri, user_id } = args;
 
@@ -25,6 +33,11 @@ pub fn mint_soulbound_nft_handler(
     // let rent = &ctx.accounts.rent;
     // let token_program = &ctx.accounts.token_program;
     // let sysvar_instructions = &ctx.accounts.sysvar_instructions;
+    let user_asset_data = &mut ctx.accounts.user_asset_data;
+    user_asset_data.user = user.key();
+    user_asset_data.asset = asset_account.key();
+    user_asset_data.referred_users = vec![];
+    user_asset_data.created_at = Clock::get()?.unix_timestamp;
 
     let asset_account_info = asset_account.to_account_info();
     let asset_authority_account_info = asset_authority.to_account_info();
@@ -36,23 +49,19 @@ pub fn mint_soulbound_nft_handler(
     // let token_program_account_info = token_program.to_account_info();
     // let sysvar_instructions_account_onfo = sysvar_instructions.to_account_info();
 
-    let asset_account_seeds: &[&[&[u8]]] = &[
-        &[
-            b"soulbound_asset",
-            &user_id.as_bytes(),
-            &nomadz_program.key().to_bytes(),
-            &[ctx.bumps.asset_account],
-        ],
-    ];
+    let asset_account_seeds: &[&[&[u8]]] = &[&[
+        b"soulbound_asset",
+        &user_id.as_bytes(),
+        &nomadz_program.key().to_bytes(),
+        &[ctx.bumps.asset_account],
+    ]];
 
-    let asset_authority_seeds: &[&[&[u8]]] = &[
-        &[
-            b"asset_authority",
-            &nomadz_program.key().to_bytes(),
-            &asset_account.key().to_bytes(),
-            &[ctx.bumps.asset_authority],
-        ],
-    ];
+    let asset_authority_seeds: &[&[&[u8]]] = &[&[
+        b"asset_authority",
+        &nomadz_program.key().to_bytes(),
+        &asset_account.key().to_bytes(),
+        &[ctx.bumps.asset_authority],
+    ]];
 
     let mut builder = CreateV2CpiBuilder::new(mpl_core_program);
     let builder = builder
@@ -64,12 +73,10 @@ pub fn mint_soulbound_nft_handler(
         .owner(Some(&user_account_info))
         .update_authority(Some(&asset_authority_account_info))
         .system_program(system_program)
-        .plugins(
-            vec![PluginAuthorityPair {
-                plugin: Plugin::FreezeDelegate(FreezeDelegate { frozen: true }),
-                authority: None,
-            }]
-        );
+        .plugins(vec![PluginAuthorityPair {
+            plugin: Plugin::FreezeDelegate(FreezeDelegate { frozen: true }),
+            authority: None,
+        }]);
 
     builder
         .invoke_signed(&[asset_account_seeds[0], asset_authority_seeds[0]])
@@ -115,10 +122,20 @@ pub fn mint_soulbound_nft_handler(
 #[instruction(args: MintSoulboundNFTArgs)]
 pub struct MintSoulboundNFT<'info> {
     /// CHECK: Validate address by deriving pda
+    ///
     #[account(
-        mut, 
-        seeds = [b"soulbound_asset", args.user_id.as_bytes(), nomadz_program.key().as_ref()], 
-        bump, 
+        init_if_needed,
+        payer = user,
+        space = UserAssetData::MAX_SIZE,
+        seeds = [b"user_asset_data", args.user_id.as_bytes(), nomadz_program.key().as_ref()],
+        bump,
+    )]
+    pub user_asset_data: Account<'info, UserAssetData>,
+
+    #[account(
+        mut,
+        seeds = [b"soulbound_asset", args.user_id.as_bytes(), nomadz_program.key().as_ref()],
+        bump,
         seeds::program = nomadz_program.key()
     )]
     pub asset_account: UncheckedAccount<'info>,
