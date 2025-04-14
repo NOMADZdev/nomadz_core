@@ -1,3 +1,5 @@
+use crate::state::soulbound::asset_data::UserAssetData;
+use crate::{errors::MintSoulboundNftErrorCode, state::config::config::Config};
 use anchor_lang::prelude::*;
 use anchor_spl::{
     metadata::{
@@ -11,43 +13,49 @@ use mpl_core::{
     types::{FreezeDelegate, Plugin, PluginAuthorityPair},
 };
 
-use crate::errors::MintSoulboundNftErrorCode;
-
-use crate::state::soulbound::asset_data::UserAssetData;
-
 pub fn mint_soulbound_nft_handler(
     ctx: Context<MintSoulboundNFT>,
     args: MintSoulboundNFTArgs,
 ) -> Result<()> {
+    require_keys_eq!(
+        ctx.accounts.admin.key(),
+        ctx.accounts.config.admin,
+        MintSoulboundNftErrorCode::Unauthorized
+    );
+
     let MintSoulboundNFTArgs { uri, user_id } = args;
 
+    let user_asset_data = &mut ctx.accounts.user_asset_data;
     let asset_account = &ctx.accounts.asset_account;
     let user = &ctx.accounts.user;
     let asset_authority = &ctx.accounts.asset_authority;
     let mpl_core_program = &ctx.accounts.mpl_core_program;
     let system_program = &ctx.accounts.system_program;
     let nomadz_program = &ctx.accounts.nomadz_program;
-    // let metadata_account = &ctx.accounts.metadata_account;
-    // let master_edition_account = &ctx.accounts.master_edition_account;
-    // let mpl_token_metadata_program = &ctx.accounts.mpl_token_metadata_program;
-    // let rent = &ctx.accounts.rent;
-    // let token_program = &ctx.accounts.token_program;
-    // let sysvar_instructions = &ctx.accounts.sysvar_instructions;
-    let user_asset_data = &mut ctx.accounts.user_asset_data;
-    user_asset_data.user = user.key();
+
     user_asset_data.asset = asset_account.key();
-    user_asset_data.referred_users = vec![];
-    user_asset_data.created_at = Clock::get()?.unix_timestamp;
+    user_asset_data.xp += 50;
+    msg!("Adding +50 XP to user: {}", user_asset_data.xp);
+    for entry in user_asset_data.referral_history.iter() {
+        if entry.level == 1 {
+            msg!("Looking for level 1 referrer: {}", entry.referrer);
+            for acc_info in ctx.remaining_accounts.iter() {
+                let mut data = UserAssetData::try_deserialize(&mut &acc_info.data.borrow()[..])?;
+
+                if entry.referrer == data.user {
+                    msg!("Found referrer match, before XP: {}", data.xp);
+                    data.xp += 50;
+                    msg!("Updated referrer XP to: {}", data.xp);
+                    data.try_serialize(&mut &mut acc_info.data.borrow_mut()[..])?;
+                    break;
+                }
+            }
+        }
+    }
 
     let asset_account_info = asset_account.to_account_info();
     let asset_authority_account_info = asset_authority.to_account_info();
     let user_account_info = user.to_account_info();
-    // let metadata_account_info = metadata_account.to_account_info();
-    // let master_edition_account_info = master_edition_account.to_account_info();
-    // let system_program_account_info = system_program.to_account_info();
-    // let rent_account_info = rent.to_account_info();
-    // let token_program_account_info = token_program.to_account_info();
-    // let sysvar_instructions_account_onfo = sysvar_instructions.to_account_info();
 
     let asset_account_seeds: &[&[&[u8]]] = &[&[
         b"soulbound_asset",
@@ -82,51 +90,18 @@ pub fn mint_soulbound_nft_handler(
         .invoke_signed(&[asset_account_seeds[0], asset_authority_seeds[0]])
         .map_err(|_| MintSoulboundNftErrorCode::AssetCreationError)?;
 
-    // let mut builder = CreateCpiBuilder::new(mpl_token_metadata_program);
-    // let builder = builder
-    //     .mint(&asset_account_info, false)
-    //     .metadata(&metadata_account_info)
-    //     .payer(&user_account_info)
-    //     .authority(&asset_authority_account_info)
-    //     .update_authority(&asset_authority_account_info, true)
-    //     .system_program(&system_program_account_info)
-    //     .master_edition(Some(&master_edition_account_info))
-    //     .spl_token_program(&token_program_account_info)
-    //     .system_program(&system_program_account_info)
-    //     .sysvar_instructions(&sysvar_instructions_account_onfo)
-    //     .create_args(CreateArgs::V1 {
-    //         name: String::from("NOMADZ Soulbound"),
-    //         symbol: String::from("NOMADZSB"),
-    //         uri,
-    //         seller_fee_basis_points: 0,
-    //         creators: None,
-    //         collection: None,
-    //         uses: None,
-    //         primary_sale_happened: false,
-    //         is_mutable: true,
-    //         token_standard: mpl_token_metadata::types::TokenStandard::NonFungible,
-    //         collection_details: None,
-    //         rule_set: None,
-    //         decimals: Some(0),
-    //         print_supply: Some(PrintSupply::Limited(1)),
-    //     });
-
-    // builder
-    //     .invoke_signed(asset_authority_seeds)
-    //     .map_err(|_| MintSoulboundNftErrorCode::UpdateAssetMetadataError)?;
-
     Ok(())
+}
+#[derive(AnchorSerialize, AnchorDeserialize, PartialEq, Eq, Debug, Clone)]
+pub struct MintSoulboundNFTArgs {
+    uri: String,
+    user_id: String,
 }
 
 #[derive(Accounts)]
 #[instruction(args: MintSoulboundNFTArgs)]
 pub struct MintSoulboundNFT<'info> {
-    /// CHECK: Validate address by deriving pda
-    ///
     #[account(
-        init_if_needed,
-        payer = user,
-        space = UserAssetData::MAX_SIZE,
         seeds = [b"user_asset_data", args.user_id.as_bytes(), nomadz_program.key().as_ref()],
         bump,
     )]
@@ -140,7 +115,6 @@ pub struct MintSoulboundNFT<'info> {
     )]
     pub asset_account: UncheckedAccount<'info>,
 
-    /// CHECK: Validate address by deriving pda
     #[account(
         mut,
         seeds = [b"asset_authority", nomadz_program.key().as_ref(), asset_account.key().as_ref()],
@@ -149,7 +123,6 @@ pub struct MintSoulboundNFT<'info> {
     )]
     pub asset_authority: UncheckedAccount<'info>,
 
-    /// CHECK: Validate address by deriving pda
     #[account(
         mut,
         seeds = [b"metadata", mpl_token_metadata_program.key().as_ref(), asset_account.key().as_ref()],
@@ -158,7 +131,6 @@ pub struct MintSoulboundNFT<'info> {
     )]
     pub metadata_account: UncheckedAccount<'info>,
 
-    /// CHECK: Validate address by deriving pda
     #[account(
         mut,
         seeds = [b"metadata", mpl_token_metadata_program.key().as_ref(), asset_account.key().as_ref(), b"edition"],
@@ -169,6 +141,15 @@ pub struct MintSoulboundNFT<'info> {
 
     #[account(mut)]
     pub user: Signer<'info>,
+
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(
+        seeds = [b"config"],
+        bump,
+    )]
+    pub config: Account<'info, Config>,
 
     #[account(address = crate::ID)]
     pub nomadz_program: AccountInfo<'info>,
@@ -189,10 +170,4 @@ pub struct MintSoulboundNFT<'info> {
 
     #[account(address = solana_program::sysvar::instructions::ID)]
     pub sysvar_instructions: AccountInfo<'info>,
-}
-
-#[derive(AnchorSerialize, AnchorDeserialize, PartialEq, Eq, Debug, Clone)]
-pub struct MintSoulboundNFTArgs {
-    uri: String,
-    user_id: String,
 }

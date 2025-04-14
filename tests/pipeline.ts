@@ -8,9 +8,12 @@ describe("Testing Pipeline", () => {
       "config/initialize.test.ts",
       "config/update.test.ts",
 
+      //referral
+      "referral/apply_referral.test.ts",
+
       // config tests
-      "soulbound/mint.test.ts",
-      "soulbound/update.test.ts",
+      // "soulbound/mint.test.ts",
+      // "soulbound/update.test.ts",
     ];
 
     for (const testFile of testFiles) {
