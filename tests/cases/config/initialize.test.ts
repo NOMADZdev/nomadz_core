@@ -1,5 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
+import * as assert from "assert";
 
 import {
   PublicKey,
@@ -7,7 +8,7 @@ import {
   SystemProgram,
 } from "@solana/web3.js";
 
-// import { NomadzCore } from "../../../target/types/nomadz_core";
+import { NomadzCore } from "../../../target/types/nomadz_core";
 import { saveAccount } from "../../../utils/account_utils";
 
 describe("initialize", () => {
@@ -16,7 +17,7 @@ describe("initialize", () => {
   const wallet = provider.wallet.payer as anchor.web3.Keypair;
   const connection = provider.connection;
 
-  const program = anchor.workspace.nomadzCore as Program<any>;
+  const program = anchor.workspace.nomadzCore as Program<NomadzCore>;
 
   it("Initializes config", async () => {
     const [configPda] = PublicKey.findProgramAddressSync(
@@ -25,9 +26,11 @@ describe("initialize", () => {
     );
 
     const configAccountInfo = await connection.getAccountInfo(configPda);
+
     if (!configAccountInfo?.data?.length) {
+      console.log("Config not found, initializing...");
       const tx = await program.methods
-        .initialize()
+        .initialize([10, 20])
         .accounts({
           config: configPda,
           initializer: wallet.publicKey,
@@ -35,11 +38,31 @@ describe("initialize", () => {
           systemProgram: SystemProgram.programId,
         })
         .transaction();
-      await sendAndConfirmTransaction(connection, tx, [wallet]);
+
+      const sig = await sendAndConfirmTransaction(connection, tx, [wallet]);
+      console.log("Transaction signature:", sig);
+    } else {
+      console.log("Config already initialized.");
     }
 
+    const account = await program.account.config.fetch(configPda);
+    console.log("Fetched Config:", account);
+
     saveAccount("config", configPda.toBase58());
-    const accountInfo = await program.account.config.fetch(configPda);
-    console.log("Config Account:", accountInfo);
+
+    assert.ok(
+      account.admin.equals(wallet.publicKey),
+      "Admin should match wallet public key",
+    );
+    assert.strictEqual(
+      account.lvlPercentages.length,
+      2,
+      "lvlPercentages should have 2 elements",
+    );
+    assert.deepStrictEqual(
+      account.lvlPercentages,
+      [10, 20],
+      "Default lvlPercentages should be [0, 0]",
+    );
   });
 });

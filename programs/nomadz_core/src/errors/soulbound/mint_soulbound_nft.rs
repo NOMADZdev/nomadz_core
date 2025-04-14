@@ -8,4 +8,6 @@ pub enum MintSoulboundNftErrorCode {
     UpdateAssetMetadataError,
     #[msg("Unknown error has occured during minting soulbound NFT")]
     UnknownError,
+    #[msg("Unauthorized")]
+    Unauthorized,
 }
