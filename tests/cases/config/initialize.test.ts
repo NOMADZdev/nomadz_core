@@ -45,7 +45,7 @@ describe("initialize", () => {
     if (!configAccountInfo?.data?.length) {
       console.log("Config not found, initializing...");
       const tx = await program.methods
-        .initialize([10, 20])
+        .initialize([20, 10])
         .accounts({
           config: configPda,
           initializer: wallet.publicKey,
@@ -76,7 +76,7 @@ describe("initialize", () => {
     );
     assert.deepStrictEqual(
       account.lvlPercentages,
-      [10, 20],
+      [20, 10],
       "Default lvlPercentages should be [0, 0]",
     );
   });
