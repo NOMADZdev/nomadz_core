@@ -218,9 +218,9 @@ describe("referral pipeline with XP from mint", () => {
     console.log("XP B:", dataB.xp.toNumber());
     console.log("XP C:", dataC.xp.toNumber());
 
-    // assert.strictEqual(dataA.xp.toNumber(), 100);
-    // assert.strictEqual(dataB.xp.toNumber(), 150);
-    // assert.strictEqual(dataC.xp.toNumber(), 150);
+    assert.strictEqual(dataA.xp.toNumber(), 100);
+    assert.strictEqual(dataB.xp.toNumber(), 150);
+    assert.strictEqual(dataC.xp.toNumber(), 150);
 
     assert.strictEqual(dataC.referralHistory.length, 2);
     assert.strictEqual(

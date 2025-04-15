@@ -5,7 +5,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-nomadz_core = "5PvRX5xj76ab8SD5AxzUPavG5SLNq5AGtFoAJXwuE1G5"
+nomadz_core = "13RckLDv2LhX2butByqjVdYaruPcpAjaPN8TfNqDvN7G"
 
 [registry]
 url = "https://api.apr.dev"

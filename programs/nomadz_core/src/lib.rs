@@ -8,7 +8,7 @@ pub mod utils;
 
 use instructions::*;
 
-declare_id!("5PvRX5xj76ab8SD5AxzUPavG5SLNq5AGtFoAJXwuE1G5");
+declare_id!("13RckLDv2LhX2butByqjVdYaruPcpAjaPN8TfNqDvN7G");
 
 #[program]
 pub mod nomadz_core {
@@ -21,9 +21,8 @@ pub mod nomadz_core {
     pub fn initialize_user_asset_data(
         ctx: Context<InitializeUserAssetData>,
         user_id: String,
-        referral_code: String,
     ) -> Result<()> {
-        initialize_user_asset_data_handler(ctx, user_id, referral_code)
+        initialize_user_asset_data_handler(ctx, user_id)
     }
 
     pub fn update_config(
