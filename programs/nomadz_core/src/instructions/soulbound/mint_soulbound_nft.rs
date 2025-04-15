@@ -101,8 +101,8 @@ pub struct MintSoulboundNFTArgs {
 #[derive(Accounts)]
 #[instruction(args: MintSoulboundNFTArgs)]
 pub struct MintSoulboundNFT<'info> {
-    #[account(
-        seeds = [b"user_asset_data", args.user_id.as_bytes(), nomadz_program.key().as_ref()],
+    #[account(mut,
+        seeds = [b"user_asset_data", args.user_id.as_bytes(),  nomadz_program.key().as_ref()],
         bump,
     )]
     pub user_asset_data: Account<'info, UserAssetData>,

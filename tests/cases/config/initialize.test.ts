@@ -18,17 +18,17 @@ dotenv.config();
 describe("initialize", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
-  // const wallet = provider.wallet.payer as anchor.web3.Keypair;
-  let wallet: Keypair;
-  before(async () => {
-    wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ""));
+  const wallet = provider.wallet.payer as anchor.web3.Keypair;
+  // let wallet: Keypair;
+  // before(async () => {
+  //   wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ""));
 
-    console.log(
-      await connection.getBalance(
-        new PublicKey(process.env.ADMIN_PUBLIC_KEY || ""),
-      ),
-    );
-  });
+  //   console.log(
+  //     await connection.getBalance(
+  //       new PublicKey(process.env.ADMIN_PUBLIC_KEY || ""),
+  //     ),
+  //   );
+  // });
 
   const connection = provider.connection;
 
