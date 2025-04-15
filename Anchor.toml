@@ -5,13 +5,13 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-nomadz_core = "6J67FJSMegRHCEAspkddYaEEgUgHtwQreDvdLp6ku61C"
+nomadz_core = "5PvRX5xj76ab8SD5AxzUPavG5SLNq5AGtFoAJXwuE1G5"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "/Users/petroyaremenko/.config/solana/id.json"
 
 [scripts]

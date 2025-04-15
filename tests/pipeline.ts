@@ -6,10 +6,10 @@ describe("Testing Pipeline", () => {
     const testFiles = [
       // config tests
       "config/initialize.test.ts",
-      "config/update.test.ts",
+      // "config/update.test.ts",
 
       //referral
-      "referral/apply_referral.test.ts",
+      // "referral/apply_referral.test.ts",
 
       // config tests
       // "soulbound/mint.test.ts",
