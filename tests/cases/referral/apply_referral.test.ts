@@ -153,6 +153,10 @@ describe("referral pipeline with XP from mint", () => {
     const userBAcc = await initUserAssetData(userB, userBId);
     const userCAcc = await initUserAssetData(userC, userCId);
 
+    saveAccount("userA", userAAcc.toBase58());
+    saveAccount("userB", userBAcc.toBase58());
+    saveAccount("userC", userCAcc.toBase58());
+
     // B is referred by A
     await program.methods
       .applyReferral()

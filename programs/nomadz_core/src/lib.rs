@@ -12,6 +12,7 @@ declare_id!("13RckLDv2LhX2butByqjVdYaruPcpAjaPN8TfNqDvN7G");
 
 #[program]
 pub mod nomadz_core {
+
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>, lvl_percentages: [u8; 2]) -> Result<()> {
@@ -23,6 +24,16 @@ pub mod nomadz_core {
         user_id: String,
     ) -> Result<()> {
         initialize_user_asset_data_handler(ctx, user_id)
+    }
+
+    pub fn update_user_asset_data(
+        ctx: Context<UpdateUserStats>,
+        user_id: String,
+        xp: u64,
+        level: u8,
+        luck: u8,
+    ) -> Result<()> {
+        update_user_stats_handler(ctx, user_id, xp, level, luck)
     }
 
     pub fn update_config(
