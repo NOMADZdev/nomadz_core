@@ -3,6 +3,7 @@ import { Program } from "@coral-xyz/anchor";
 import * as assert from "assert";
 
 import {
+  Keypair,
   PublicKey,
   sendAndConfirmTransaction,
   SystemProgram,
@@ -10,11 +11,25 @@ import {
 
 import { NomadzCore } from "../../../target/types/nomadz_core";
 import { saveAccount } from "../../../utils/account_utils";
+import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
+import * as dotenv from "dotenv";
 
+dotenv.config();
 describe("initialize", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
-  const wallet = provider.wallet.payer as anchor.web3.Keypair;
+  // const wallet = provider.wallet.payer as anchor.web3.Keypair;
+  let wallet: Keypair;
+  before(async () => {
+    wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ""));
+
+    console.log(
+      await connection.getBalance(
+        new PublicKey(process.env.ADMIN_PUBLIC_KEY || ""),
+      ),
+    );
+  });
+
   const connection = provider.connection;
 
   const program = anchor.workspace.nomadzCore as Program<NomadzCore>;

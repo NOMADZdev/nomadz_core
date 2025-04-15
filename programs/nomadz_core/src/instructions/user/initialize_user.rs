@@ -6,7 +6,8 @@ use anchor_lang::prelude::*;
 
 pub fn initialize_user_asset_data_handler(
     ctx: Context<InitializeUserAssetData>,
-    user_id: String,
+    _: String,
+    _: String,
 ) -> Result<()> {
     require_keys_eq!(
         ctx.accounts.admin.key(),
@@ -31,13 +32,13 @@ pub fn initialize_user_asset_data_handler(
 }
 
 #[derive(Accounts)]
-#[instruction(user_id: String)]
+#[instruction(user_id: String, referral_code: String)]
 pub struct InitializeUserAssetData<'info> {
     #[account(
         init_if_needed,
         payer = admin,
         space = UserAssetData::MAX_SIZE,
-        seeds = [b"user_asset_data", user_id.as_bytes(), nomadz_program.key().as_ref()],
+        seeds = [b"user_asset_data", user_id.as_bytes(), referral_code.as_bytes(), nomadz_program.key().as_ref()],
         bump,
     )]
     pub user_asset_data: Account<'info, UserAssetData>,
