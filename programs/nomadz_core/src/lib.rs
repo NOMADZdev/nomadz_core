@@ -8,7 +8,7 @@ pub mod utils;
 
 use instructions::*;
 
-declare_id!("13RckLDv2LhX2butByqjVdYaruPcpAjaPN8TfNqDvN7G");
+declare_id!("3H1oVTF1UL22CCc9id7msdp1sbqTScVdm1PHU65cV8W7");
 
 #[program]
 pub mod nomadz_core {
@@ -22,8 +22,11 @@ pub mod nomadz_core {
     pub fn initialize_user_asset_data(
         ctx: Context<InitializeUserAssetData>,
         user_id: String,
+        xp: u64,
+        level: u8,
+        luck: u8,
     ) -> Result<()> {
-        initialize_user_asset_data_handler(ctx, user_id)
+        initialize_user_asset_data_handler(ctx, user_id, xp, level, luck)
     }
 
     pub fn update_user_asset_data(

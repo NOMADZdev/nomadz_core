@@ -5,7 +5,7 @@ describe("Testing Pipeline", () => {
     // uncomment required test file
     const testFiles = [
       // config tests
-      // "config/initialize.test.ts",
+      "config/initialize.test.ts",
       // "config/update.test.ts",
 
       //referral
@@ -14,7 +14,7 @@ describe("Testing Pipeline", () => {
 
       // config tests
       // "soulbound/mint.test.ts",
-      "soulbound/update.test.ts",
+      // "soulbound/update.test.ts",
     ];
 
     for (const testFile of testFiles) {
