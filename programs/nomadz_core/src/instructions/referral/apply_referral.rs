@@ -29,7 +29,7 @@ pub fn apply_referral_handler(ctx: Context<ApplyReferral>) -> Result<()> {
         .map(|entry| entry.incremented())
         .collect();
 
-    updated_referrals.push(ReferralEntry::new(referrer_asset_data.user, 1));
+    updated_referrals.push(ReferralEntry::new(referrer_asset_data.key(), 1));
 
     if updated_referrals.len() > UserAssetData::MAX_REFERRED {
         updated_referrals =

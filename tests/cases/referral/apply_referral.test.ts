@@ -45,8 +45,12 @@ describe("referral pipeline with XP from mint", () => {
       program.programId,
     );
 
+    const newXP = new anchor.BN(500);
+    const newLevel = 10;
+    const newLuck = 42;
+
     await program.methods
-      .initializeUserAssetData(userId)
+      .initializeUserAssetData(userId, newXP, newLevel, newLuck)
       .accounts({
         userAssetData: userAssetAccount,
         user: user.publicKey,

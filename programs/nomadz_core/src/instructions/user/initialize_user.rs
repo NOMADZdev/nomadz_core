@@ -7,6 +7,9 @@ use anchor_lang::prelude::*;
 pub fn initialize_user_asset_data_handler(
     ctx: Context<InitializeUserAssetData>,
     _: String,
+    xp: u64,
+    level: u8,
+    luck: u8,
 ) -> Result<()> {
     require_keys_eq!(
         ctx.accounts.admin.key(),
@@ -19,9 +22,9 @@ pub fn initialize_user_asset_data_handler(
     user_asset_data.asset = Pubkey::default();
     user_asset_data.referral_history = vec![];
     user_asset_data.created_at = Clock::get()?.unix_timestamp;
-    user_asset_data.xp = 100;
-    user_asset_data.level = 1;
-    user_asset_data.luck = 0;
+    user_asset_data.xp = xp;
+    user_asset_data.level = level;
+    user_asset_data.luck = luck;
 
     msg!(
         "UserAssetData initialized for user: {}",
