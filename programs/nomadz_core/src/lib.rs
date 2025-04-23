@@ -8,11 +8,7 @@ pub mod utils;
 
 use instructions::*;
 
-<<<<<<< HEAD
-declare_id!("Fj9Xo9jE9wLv5NbhMMVvJy4S7xGKtgRmuBN8JYic3ary");
-=======
 declare_id!("GNHzqEayUCiZxuyJYMQztQ5Rc5xDNbQ611Hi5TK6Eq7T");
->>>>>>> 158bd69 (fix: referral percentages)
 
 #[program]
 pub mod nomadz_core {
@@ -27,7 +23,7 @@ pub mod nomadz_core {
         user_id: String,
         xp: u64,
         level: u8,
-        luck: u8
+        luck: u8,
     ) -> Result<()> {
         initialize_user_asset_data_handler(ctx, user_id, xp, level, luck)
     }
@@ -37,15 +33,24 @@ pub mod nomadz_core {
         user_id: String,
         xp: u64,
         level: u8,
-        luck: u8
+        luck: u8,
     ) -> Result<()> {
         update_user_stats_handler(ctx, user_id, xp, level, luck)
+    }
+    pub fn update_mint(
+        ctx: Context<UpdateUserMint>,
+        user_id: String,
+        xp: u64,
+        level: u8,
+        luck: u8,
+    ) -> Result<()> {
+        update_user_mint(ctx, user_id, xp, level, luck)
     }
 
     pub fn update_config(
         ctx: Context<UpdateConfig>,
         new_admin: Pubkey,
-        lvl_percentages: [u8; 2]
+        lvl_percentages: [u8; 2],
     ) -> Result<()> {
         instructions::config::update_config::update_config_handler(ctx, new_admin, lvl_percentages)
     }
@@ -56,14 +61,14 @@ pub mod nomadz_core {
 
     pub fn mint_soulbound_nft(
         ctx: Context<MintSoulboundNFT>,
-        data: MintSoulboundNFTArgs
+        data: MintSoulboundNFTArgs,
     ) -> Result<()> {
         instructions::soulbound::mint_soulbound_nft::mint_soulbound_nft_handler(ctx, data)
     }
 
     pub fn update_soulbound_nft(
         ctx: Context<UpdateSoulboundNFT>,
-        data: UpdateSoulboundNFTArgs
+        data: UpdateSoulboundNFTArgs,
     ) -> Result<()> {
         instructions::soulbound::update_soulbound_nft::update_soulbound_nft_handler(ctx, data)
     }

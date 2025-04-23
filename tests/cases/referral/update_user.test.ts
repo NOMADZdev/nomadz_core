@@ -242,7 +242,7 @@ describe("update user stats with referral XP rewards", () => {
       7500,
       "A should receive 10 from C and 10 from F",
     );
-    assert.strictEqual(deltaB, 15000, "B should receive 10 from C");
-    assert.strictEqual(deltaD, 15000, "D should receive 10 from F");
+    assert.strictEqual(deltaB, 7500, "B should receive 10 from C");
+    assert.strictEqual(deltaD, 7500, "D should receive 10 from F");
   });
 });

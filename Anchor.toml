@@ -5,23 +5,14 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-<<<<<<< HEAD
-nomadz_core = "Fj9Xo9jE9wLv5NbhMMVvJy4S7xGKtgRmuBN8JYic3ary"
-=======
 nomadz_core = "GNHzqEayUCiZxuyJYMQztQ5Rc5xDNbQ611Hi5TK6Eq7T"
->>>>>>> 158bd69 (fix: referral percentages)
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-<<<<<<< HEAD
-cluster = "Devnet"
-wallet = "/Users/kalyonekenobe/.config/solana/id.json"
-=======
 cluster = "Localnet"
 wallet = "/Users/petroyaremenko/.config/solana/id.json"
->>>>>>> 158bd69 (fix: referral percentages)
 
 [scripts]
 test = "yarn ts-mocha -p ./tsconfig.json -t 1000000 tests/**/pipeline.ts"

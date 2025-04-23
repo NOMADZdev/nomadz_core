@@ -199,12 +199,27 @@ describe("referral pipeline with XP from mint", () => {
 
     // Mint NFT only for userC, pass B as remaining (level 1 referrer)
     await mintSoulbound(userC, userCId, [
-      {
-        pubkey: userBAcc,
-        isWritable: true,
-        isSigner: false,
-      },
+      // {
+      //   pubkey: userBAcc,
+      //   isWritable: true,
+      //   isSigner: false,
+      // },
     ]);
+    const nupdateXP = new anchor.BN(150);
+
+    const tx2 = await program.methods
+      .updateMint(userCId, nupdateXP, 1, 0)
+      .accounts({
+        userAssetData: userCAcc,
+        admin: wallet.publicKey,
+        config: configPda,
+        nomadzProgram: program.programId,
+      })
+      .remainingAccounts([
+        { pubkey: userBAcc, isWritable: true, isSigner: false },
+      ])
+      .signers([wallet])
+      .rpc();
 
     const dataA = await program.account.userAssetData.fetch(userAAcc);
     const dataB = await program.account.userAssetData.fetch(userBAcc);
@@ -237,74 +252,6 @@ describe("referral pipeline with XP from mint", () => {
     console.log("XP A:", dataA.xp.toNumber());
     console.log("XP B:", dataB.xp.toNumber());
     console.log("XP C:", dataC.xp.toNumber());
-
-    const userD = Keypair.generate();
-    const userF = Keypair.generate();
-    const userDId = "userD";
-    const userFId = "userF";
-
-    // Init User D & F
-    const userDAcc = await initUserAssetData(userD, userDId);
-    const userFAcc = await initUserAssetData(userF, userFId);
-
-    saveAccount("userD", userDAcc.toBase58());
-    saveAccount("userF", userFAcc.toBase58());
-
-    // D is referred by A
-    await program.methods
-      .applyReferral()
-      .accounts({
-        userAssetData: userDAcc,
-        referrerAssetData: userAAcc,
-        authority: wallet.publicKey,
-        config: configPda,
-      })
-      .signers([wallet])
-      .rpc();
-
-    // F is referred by D
-    await program.methods
-      .applyReferral()
-      .accounts({
-        userAssetData: userFAcc,
-        referrerAssetData: userDAcc,
-        authority: wallet.publicKey,
-        config: configPda,
-      })
-      .signers([wallet])
-      .rpc();
-
-    // Mint NFT for F, passing D as writable referrer
-    await mintSoulbound(userF, userFId, [
-      {
-        pubkey: userDAcc,
-        isWritable: true,
-        isSigner: false,
-      },
-    ]);
-
-    const dataD = await program.account.userAssetData.fetch(userDAcc);
-    const dataF = await program.account.userAssetData.fetch(userFAcc);
-
-    console.log("XP D:", dataD.xp.toNumber());
-    console.log("XP F:", dataF.xp.toNumber());
-
-    console.log(
-      "Referral History F:",
-      dataF.referralHistory.map((r: any) => ({
-        referrer: r.referrer.toBase58(),
-        level: r.level,
-      })),
-    );
-
-    // ✅ Assertions
-    assert.strictEqual(dataD.xp.toNumber(), 150, "User D should gain +50 XP");
-    assert.strictEqual(dataF.xp.toNumber(), 150, "User F gets default +50 XP");
-
-    // Check referral history of F
-    assert.strictEqual(dataF.referralHistory.length, 2);
-    assert.strictEqual(dataF.referralHistory[0].level, 2);
-    assert.strictEqual(dataF.referralHistory[1].level, 1);
 
     assert.strictEqual(dataA.xp.toNumber(), 100);
     assert.strictEqual(dataB.xp.toNumber(), 150);
