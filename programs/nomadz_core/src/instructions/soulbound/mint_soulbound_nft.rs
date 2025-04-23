@@ -41,8 +41,8 @@ pub fn mint_soulbound_nft_handler(
             msg!("Looking for level 1 referrer: {}", entry.referrer);
             for acc_info in ctx.remaining_accounts.iter() {
                 let mut data = UserAssetData::try_deserialize(&mut &acc_info.data.borrow()[..])?;
-
-                if entry.referrer == data.user {
+                msg!("Fetching for level 1 referrer: {}", acc_info.key());
+                if entry.referrer.key() == acc_info.key() {
                     msg!("Found referrer match, before XP: {}", data.xp);
                     data.xp += 50;
                     msg!("Updated referrer XP to: {}", data.xp);

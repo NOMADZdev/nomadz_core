@@ -37,6 +37,7 @@ pub fn update_user_stats_handler(
 
     if gained_xp > 0 {
         for entry in user_asset_data.referral_history.iter() {
+            msg!("Looking for level 1 referrer: {}", entry.referrer);
             let percentage = match entry.level {
                 1 => ctx.accounts.config.lvl_percentages[0],
                 2 => ctx.accounts.config.lvl_percentages[1],
@@ -44,11 +45,11 @@ pub fn update_user_stats_handler(
             };
 
             let reward = gained_xp * percentage as u64 / 100;
-
             for acc_info in ctx.remaining_accounts.iter() {
+                msg!("Fetching for level 1 referrer: {}", acc_info.key());
                 let mut referrer_data =
                     UserAssetData::try_deserialize(&mut &acc_info.data.borrow()[..])?;
-                if referrer_data.user == entry.referrer {
+                if entry.referrer.key() == acc_info.key() {
                     msg!(
                         "Rewarding referrer {} (level {}) with {} XP",
                         referrer_data.user,
