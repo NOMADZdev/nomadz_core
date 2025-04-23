@@ -37,14 +37,29 @@ pub mod nomadz_core {
     ) -> Result<()> {
         update_user_stats_handler(ctx, user_id, xp, level, luck)
     }
+
     pub fn update_mint(
         ctx: Context<UpdateUserMint>,
         user_id: String,
+        referrer_id: String,
         xp: u64,
         level: u8,
         luck: u8,
+        rxp: u64,
+        rlevel: u8,
+        rluck: u8,
     ) -> Result<()> {
-        update_user_mint(ctx, user_id, xp, level, luck)
+        update_user_mint(
+            ctx,
+            user_id,
+            referrer_id,
+            xp,
+            level,
+            luck,
+            rxp,
+            rlevel,
+            rluck,
+        )
     }
 
     pub fn update_config(

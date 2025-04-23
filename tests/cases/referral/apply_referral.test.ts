@@ -208,16 +208,14 @@ describe("referral pipeline with XP from mint", () => {
     const nupdateXP = new anchor.BN(150);
 
     const tx2 = await program.methods
-      .updateMint(userCId, nupdateXP, 1, 0)
+      .updateMint(userCId, userBId, nupdateXP, 1, 0, nupdateXP, 1, 0)
       .accounts({
         userAssetData: userCAcc,
+        referrerAsset: userBAcc,
         admin: wallet.publicKey,
         config: configPda,
         nomadzProgram: program.programId,
       })
-      .remainingAccounts([
-        { pubkey: userBAcc, isWritable: true, isSigner: false },
-      ])
       .signers([wallet])
       .rpc();
 
