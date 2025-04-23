@@ -6,11 +6,23 @@ import { saveAccount } from "../../../utils/account_utils";
 import * as dotenv from "dotenv";
 import * as assert from "assert";
 dotenv.config();
+import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 
 describe("referral pipeline with XP from mint", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
-  const wallet = provider.wallet.payer as anchor.web3.Keypair;
+  let wallet: Keypair;
+  before(async () => {
+    wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ""));
+
+    await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
+    await new Promise((res) => setTimeout(res, 1000));
+    console.log(
+      await connection.getBalance(
+        new PublicKey(process.env.ADMIN_PUBLIC_KEY || ""),
+      ),
+    );
+  });
   const connection = provider.connection;
   const program = anchor.workspace.nomadzCore as Program<NomadzCore>;
 
@@ -45,7 +57,7 @@ describe("referral pipeline with XP from mint", () => {
       program.programId,
     );
 
-    const newXP = new anchor.BN(500);
+    const newXP = new anchor.BN(100);
     const newLevel = 10;
     const newLuck = 42;
 
@@ -146,7 +158,7 @@ describe("referral pipeline with XP from mint", () => {
         sysvarInstructions: anchor.web3.SYSVAR_INSTRUCTIONS_PUBKEY,
       })
       .remainingAccounts(remainingAccounts)
-      .signers([user])
+      .signers([user, wallet])
       .rpc();
 
     console.log(`Minted for ${userId}`, tx);
@@ -226,6 +238,74 @@ describe("referral pipeline with XP from mint", () => {
     console.log("XP B:", dataB.xp.toNumber());
     console.log("XP C:", dataC.xp.toNumber());
 
+    const userD = Keypair.generate();
+    const userF = Keypair.generate();
+    const userDId = "userD";
+    const userFId = "userF";
+
+    // Init User D & F
+    const userDAcc = await initUserAssetData(userD, userDId);
+    const userFAcc = await initUserAssetData(userF, userFId);
+
+    saveAccount("userD", userDAcc.toBase58());
+    saveAccount("userF", userFAcc.toBase58());
+
+    // D is referred by A
+    await program.methods
+      .applyReferral()
+      .accounts({
+        userAssetData: userDAcc,
+        referrerAssetData: userAAcc,
+        authority: wallet.publicKey,
+        config: configPda,
+      })
+      .signers([wallet])
+      .rpc();
+
+    // F is referred by D
+    await program.methods
+      .applyReferral()
+      .accounts({
+        userAssetData: userFAcc,
+        referrerAssetData: userDAcc,
+        authority: wallet.publicKey,
+        config: configPda,
+      })
+      .signers([wallet])
+      .rpc();
+
+    // Mint NFT for F, passing D as writable referrer
+    await mintSoulbound(userF, userFId, [
+      {
+        pubkey: userDAcc,
+        isWritable: true,
+        isSigner: false,
+      },
+    ]);
+
+    const dataD = await program.account.userAssetData.fetch(userDAcc);
+    const dataF = await program.account.userAssetData.fetch(userFAcc);
+
+    console.log("XP D:", dataD.xp.toNumber());
+    console.log("XP F:", dataF.xp.toNumber());
+
+    console.log(
+      "Referral History F:",
+      dataF.referralHistory.map((r: any) => ({
+        referrer: r.referrer.toBase58(),
+        level: r.level,
+      })),
+    );
+
+    // ✅ Assertions
+    assert.strictEqual(dataD.xp.toNumber(), 150, "User D should gain +50 XP");
+    assert.strictEqual(dataF.xp.toNumber(), 150, "User F gets default +50 XP");
+
+    // Check referral history of F
+    assert.strictEqual(dataF.referralHistory.length, 2);
+    assert.strictEqual(dataF.referralHistory[0].level, 2);
+    assert.strictEqual(dataF.referralHistory[1].level, 1);
+
     assert.strictEqual(dataA.xp.toNumber(), 100);
     assert.strictEqual(dataB.xp.toNumber(), 150);
     assert.strictEqual(dataC.xp.toNumber(), 150);
@@ -233,12 +313,12 @@ describe("referral pipeline with XP from mint", () => {
     assert.strictEqual(dataC.referralHistory.length, 2);
     assert.strictEqual(
       dataC.referralHistory[0].referrer.toBase58(),
-      userA.publicKey.toBase58(),
+      userAAcc.toBase58(),
     );
     assert.strictEqual(dataC.referralHistory[0].level, 2);
     assert.strictEqual(
       dataC.referralHistory[1].referrer.toBase58(),
-      userB.publicKey.toBase58(),
+      userBAcc.toBase58(),
     );
     assert.strictEqual(dataC.referralHistory[1].level, 1);
   });

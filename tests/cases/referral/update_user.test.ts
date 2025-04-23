@@ -5,13 +5,25 @@ import { NomadzCore } from "../../../target/types/nomadz_core";
 import { getAccount } from "../../../utils/account_utils";
 import * as dotenv from "dotenv";
 import * as assert from "assert";
+import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 
 dotenv.config();
 
 describe("update user stats with referral XP rewards", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
-  const wallet = provider.wallet.payer as Keypair;
+  let wallet: Keypair;
+  before(async () => {
+    wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ""));
+
+    await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
+    await new Promise((res) => setTimeout(res, 1000));
+    console.log(
+      await connection.getBalance(
+        new PublicKey(process.env.ADMIN_PUBLIC_KEY || ""),
+      ),
+    );
+  });
   const connection = provider.connection;
   const program = anchor.workspace.nomadzCore as Program<NomadzCore>;
 
@@ -70,49 +82,167 @@ describe("update user stats with referral XP rewards", () => {
     );
   });
 
-  it("should update user stats and distribute XP to level 1 and 2", async () => {
-    const newXP = new anchor.BN(500);
+  const initUser = async (
+    user: Keypair,
+    userId: string,
+  ): Promise<PublicKey> => {
+    await connection.requestAirdrop(user.publicKey, 1_000_000_000);
+    await new Promise((res) => setTimeout(res, 1000));
+
+    const [userAssetAccount] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("user_asset_data"),
+        Buffer.from(userId),
+        program.programId.toBytes(),
+      ],
+      program.programId,
+    );
+
+    await program.methods
+      .initializeUserAssetData(userId, new anchor.BN(100000), 1, 0)
+      .accounts({
+        userAssetData: userAssetAccount,
+        user: user.publicKey,
+        admin: wallet.publicKey,
+        config: configPda,
+        nomadzProgram: program.programId,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([wallet])
+      .rpc();
+
+    return userAssetAccount;
+  };
+  const userA = Keypair.generate();
+  const userB = Keypair.generate();
+  const userC = Keypair.generate();
+  const userD = Keypair.generate();
+  const userF = Keypair.generate();
+
+  const userAId = "userA";
+  const userBId = "userB";
+  const userCId = "userC";
+  const userDId = "userD";
+  const userFId = "userF";
+  it("builds 2 referral branches and distributes XP", async () => {
+    const updateXP = new anchor.BN(175000);
     const newLevel = 10;
     const newLuck = 42;
 
-    const beforeB = await program.account.userAssetData.fetch(level1Account);
-    const beforeA = await program.account.userAssetData.fetch(level2Account);
+    const accA = await initUser(userA, userAId);
+    const accB = await initUser(userB, userBId);
+    const accC = await initUser(userC, userCId);
+    const accD = await initUser(userD, userDId);
+    const accF = await initUser(userF, userFId);
 
-    const tx = await program.methods
-      .updateUserAssetData(userId, newXP, newLevel, newLuck)
+    // Apply referrals
+    await program.methods
+      .applyReferral()
       .accounts({
-        userAssetData: userAssetAccount,
+        userAssetData: accB,
+        referrerAssetData: accA,
+        authority: wallet.publicKey,
+        config: configPda,
+      })
+      .signers([wallet])
+      .rpc();
+
+    await program.methods
+      .applyReferral()
+      .accounts({
+        userAssetData: accC,
+        referrerAssetData: accB,
+        authority: wallet.publicKey,
+        config: configPda,
+      })
+      .signers([wallet])
+      .rpc();
+
+    await program.methods
+      .applyReferral()
+      .accounts({
+        userAssetData: accD,
+        referrerAssetData: accA,
+        authority: wallet.publicKey,
+        config: configPda,
+      })
+      .signers([wallet])
+      .rpc();
+
+    await program.methods
+      .applyReferral()
+      .accounts({
+        userAssetData: accF,
+        referrerAssetData: accD,
+        authority: wallet.publicKey,
+        config: configPda,
+      })
+      .signers([wallet])
+      .rpc();
+
+    const beforeA = await program.account.userAssetData.fetch(accA);
+    const beforeB = await program.account.userAssetData.fetch(accB);
+    const beforeD = await program.account.userAssetData.fetch(accD);
+
+    // Update user C
+    const tx = await program.methods
+      .updateUserAssetData(userCId, updateXP, newLevel, newLuck)
+      .accounts({
+        userAssetData: accC,
         admin: wallet.publicKey,
         config: configPda,
         nomadzProgram: program.programId,
       })
       .remainingAccounts([
-        { pubkey: level1Account, isWritable: true, isSigner: false },
-        { pubkey: level2Account, isWritable: true, isSigner: false },
+        { pubkey: accB, isWritable: true, isSigner: false },
+        { pubkey: accA, isWritable: true, isSigner: false },
       ])
       .signers([wallet])
       .rpc();
 
-    console.log("Transaction:", tx);
+    // Update user F
+    const tx2 = await program.methods
+      .updateUserAssetData(userFId, updateXP, newLevel, newLuck)
+      .accounts({
+        userAssetData: accF,
+        admin: wallet.publicKey,
+        config: configPda,
+        nomadzProgram: program.programId,
+      })
+      .remainingAccounts([
+        { pubkey: accD, isWritable: true, isSigner: false },
+        { pubkey: accA, isWritable: true, isSigner: false },
+      ])
+      .signers([wallet])
+      .rpc();
 
-    const updated = await program.account.userAssetData.fetch(userAssetAccount);
-    const updatedB = await program.account.userAssetData.fetch(level1Account);
-    const updatedA = await program.account.userAssetData.fetch(level2Account);
+    console.log("Link: ", tx);
+    console.log("Link: ", tx2);
 
-    assert.strictEqual(updated.xp.toNumber(), newXP.toNumber());
-    assert.strictEqual(updated.level, newLevel);
-    assert.strictEqual(updated.luck, newLuck);
+    const afterA = await program.account.userAssetData.fetch(accA);
+    const afterB = await program.account.userAssetData.fetch(accB);
+    const afterD = await program.account.userAssetData.fetch(accD);
+    const afterC = await program.account.userAssetData.fetch(accC);
+    const afterF = await program.account.userAssetData.fetch(accF);
 
-    const bDiff = updatedB.xp.toNumber() - beforeB.xp.toNumber();
-    const aDiff = updatedA.xp.toNumber() - beforeA.xp.toNumber();
+    const deltaA = afterA.xp.toNumber() - beforeA.xp.toNumber(); // +10 (C) +10 (F)
+    const deltaB = afterB.xp.toNumber() - beforeB.xp.toNumber(); // +20 from C
+    const deltaD = afterD.xp.toNumber() - beforeD.xp.toNumber(); // +20 from F
 
-    console.log("Level 1 (B) XP before:", updatedB.xp.toNumber());
-    console.log("Level 1 (B) XP gained:", bDiff);
-    console.log("Level 2 (A) XP before:", updatedA.xp.toNumber());
+    console.log("XP A gained:", deltaA); // 20
+    console.log("XP B gained:", deltaB); // 20
+    console.log("XP D gained:", deltaD); // 20
+    console.log("XP C:", afterC.xp.toNumber()); // 200 (100 base + 100 update)
+    console.log("XP F:", afterF.xp.toNumber()); // 200
 
-    console.log("Level 2 (A) XP gained:", aDiff);
-
-    // assert(bDiff > 0);
-    // assert(aDiff > 0);
+    assert.strictEqual(afterC.xp.toNumber(), 175000); // 100 initial + 100 update
+    assert.strictEqual(afterF.xp.toNumber(), 175000); // 100 initial + 100 update
+    assert.strictEqual(
+      deltaA,
+      7500,
+      "A should receive 10 from C and 10 from F",
+    );
+    assert.strictEqual(deltaB, 15000, "B should receive 10 from C");
+    assert.strictEqual(deltaD, 15000, "D should receive 10 from F");
   });
 });

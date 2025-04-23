@@ -8,7 +8,11 @@ pub mod utils;
 
 use instructions::*;
 
+<<<<<<< HEAD
 declare_id!("Fj9Xo9jE9wLv5NbhMMVvJy4S7xGKtgRmuBN8JYic3ary");
+=======
+declare_id!("GNHzqEayUCiZxuyJYMQztQ5Rc5xDNbQ611Hi5TK6Eq7T");
+>>>>>>> 158bd69 (fix: referral percentages)
 
 #[program]
 pub mod nomadz_core {
