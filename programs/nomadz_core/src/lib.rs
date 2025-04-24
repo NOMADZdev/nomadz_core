@@ -8,7 +8,7 @@ pub mod utils;
 
 use instructions::*;
 
-declare_id!("EdU3YLWgUeyHcKHrZVrPoxRJnDr9Deyv6SR9aHTrB8Fv");
+declare_id!("HBjqCprHWVGPBGB2j2kyLJ9KT7eo5vhBZNE2zovtfMnG");
 
 #[program]
 pub mod nomadz_core {
@@ -23,7 +23,7 @@ pub mod nomadz_core {
         user_id: String,
         xp: u64,
         level: u8,
-        luck: u8
+        luck: u8,
     ) -> Result<()> {
         initialize_user_asset_data_handler(ctx, user_id, xp, level, luck)
     }
@@ -33,15 +33,39 @@ pub mod nomadz_core {
         user_id: String,
         xp: u64,
         level: u8,
-        luck: u8
+        luck: u8,
     ) -> Result<()> {
         update_user_stats_handler(ctx, user_id, xp, level, luck)
+    }
+
+    pub fn update_mint(
+        ctx: Context<UpdateUserMint>,
+        user_id: String,
+        referrer_id: String,
+        xp: u64,
+        level: u8,
+        luck: u8,
+        rxp: u64,
+        rlevel: u8,
+        rluck: u8,
+    ) -> Result<()> {
+        update_user_mint(
+            ctx,
+            user_id,
+            referrer_id,
+            xp,
+            level,
+            luck,
+            rxp,
+            rlevel,
+            rluck,
+        )
     }
 
     pub fn update_config(
         ctx: Context<UpdateConfig>,
         new_admin: Pubkey,
-        lvl_percentages: [u8; 2]
+        lvl_percentages: [u8; 2],
     ) -> Result<()> {
         instructions::config::update_config::update_config_handler(ctx, new_admin, lvl_percentages)
     }
@@ -52,14 +76,14 @@ pub mod nomadz_core {
 
     pub fn mint_soulbound_nft(
         ctx: Context<MintSoulboundNFT>,
-        data: MintSoulboundNFTArgs
+        data: MintSoulboundNFTArgs,
     ) -> Result<()> {
         instructions::soulbound::mint_soulbound_nft::mint_soulbound_nft_handler(ctx, data)
     }
 
     pub fn update_soulbound_nft(
         ctx: Context<UpdateSoulboundNFT>,
-        data: UpdateSoulboundNFTArgs
+        data: UpdateSoulboundNFTArgs,
     ) -> Result<()> {
         instructions::soulbound::update_soulbound_nft::update_soulbound_nft_handler(ctx, data)
     }

@@ -34,24 +34,24 @@ pub fn mint_soulbound_nft_handler(
     let nomadz_program = &ctx.accounts.nomadz_program;
 
     user_asset_data.asset = asset_account.key();
-    user_asset_data.xp += 50;
-    msg!("Adding +50 XP to user: {}", user_asset_data.xp);
-    for entry in user_asset_data.referral_history.iter() {
-        if entry.level == 1 {
-            msg!("Looking for level 1 referrer: {}", entry.referrer);
-            for acc_info in ctx.remaining_accounts.iter() {
-                let mut data = UserAssetData::try_deserialize(&mut &acc_info.data.borrow()[..])?;
-                msg!("Fetching for level 1 referrer: {}", acc_info.key());
-                if entry.referrer.key() == acc_info.key() {
-                    msg!("Found referrer match, before XP: {}", data.xp);
-                    data.xp += 50;
-                    msg!("Updated referrer XP to: {}", data.xp);
-                    data.try_serialize(&mut &mut acc_info.data.borrow_mut()[..])?;
-                    break;
-                }
-            }
-        }
-    }
+    // user_asset_data.xp += 50;
+    // msg!("Adding +50 XP to user: {}", user_asset_data.xp);
+    // for entry in user_asset_data.referral_history.iter() {
+    //     if entry.level == 1 {
+    //         msg!("Looking for level 1 referrer: {}", entry.referrer);
+    //         for acc_info in ctx.remaining_accounts.iter() {
+    //             let mut data = UserAssetData::try_deserialize(&mut &acc_info.data.borrow()[..])?;
+    //             msg!("Fetching for level 1 referrer: {}", acc_info.key());
+    //             if entry.referrer.key() == acc_info.key() {
+    //                 msg!("Found referrer match, before XP: {}", data.xp);
+    //                 data.xp += 50;
+    //                 msg!("Updated referrer XP to: {}", data.xp);
+    //                 data.try_serialize(&mut &mut acc_info.data.borrow_mut()[..])?;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
 
     let asset_account_info = asset_account.to_account_info();
     let asset_authority_account_info = asset_authority.to_account_info();
