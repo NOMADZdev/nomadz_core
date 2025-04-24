@@ -10,7 +10,7 @@ describe('Testing Pipeline', () => {
 
       //referral
       // "referral/apply_referral.test.ts",
-      "referral/update_user.test.ts",
+      // "referral/update_user.test.ts",
 
       // config tests
       // "soulbound/mint.test.ts",

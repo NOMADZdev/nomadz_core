@@ -19,17 +19,9 @@ describe('initialize', () => {
   before(async () => {
     wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ''));
 
-<<<<<<< HEAD
-    console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
-=======
-    await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
-    await new Promise((res) => setTimeout(res, 1000));
-    console.log(
-      await connection.getBalance(
-        new PublicKey(process.env.ADMIN_PUBLIC_KEY || ""),
-      ),
-    );
->>>>>>> 158bd69 (fix: referral percentages)
+    // await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
+    // await new Promise(res => setTimeout(res, 1000));
+    // console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
   });
 
   const connection = provider.connection;
@@ -47,11 +39,7 @@ describe('initialize', () => {
     if (!configAccountInfo?.data?.length) {
       console.log('Config not found, initializing...');
       const tx = await program.methods
-<<<<<<< HEAD
         .initialize([10, 5])
-=======
-        .initialize([20, 5])
->>>>>>> 158bd69 (fix: referral percentages)
         .accounts({
           config: configPda,
           initializer: wallet.publicKey,
@@ -75,13 +63,8 @@ describe('initialize', () => {
     assert.strictEqual(account.lvlPercentages.length, 2, 'lvlPercentages should have 2 elements');
     assert.deepStrictEqual(
       account.lvlPercentages,
-<<<<<<< HEAD
       [10, 5],
       'Default lvlPercentages should be [0, 0]',
-=======
-      [20, 5],
-      "Default lvlPercentages should be [0, 0]",
->>>>>>> 158bd69 (fix: referral percentages)
     );
   });
 });
