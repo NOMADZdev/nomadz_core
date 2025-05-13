@@ -1,3 +1,9 @@
 {
-  "config": "5mmrU28QCQZyogpnoYMFPp1ooBNvApJ5Jk1EnVmcjWpY"
+  "config": "DmeXGARz1HMtKLJxbuhzRQoyHHSKsrqcKEzZ9EctnCw5",
+  "configFeeVault": "7xNVSwWDc9gBvWtakCG9Vdy1ETPMk3sGTYW28XoGDof9",
+  "userA": "BiiRruRFEweo6aCA5RKAum4XDH8EjPkWUkQGVxzsytUc",
+  "userB": "3kgemBLGvVtvNeKkJukRVQW3P8g5PQdRvbrdKtMaubLq",
+  "userC": "Gh2ob4PD2VNG27wpS5q5RESTQuUCKmgR1TAs4gGSKuSA",
+  "assetAccount": "EVFryM49jq3sUZaD8pdEs86JfFqhomRAAGZvhaEeuRKc",
+  "userAssetAccount": "BiiRruRFEweo6aCA5RKAum4XDH8EjPkWUkQGVxzsytUc"
 }
