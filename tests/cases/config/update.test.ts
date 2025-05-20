@@ -17,23 +17,24 @@ describe('update config', () => {
   const connection = provider.connection;
   const program = anchor.workspace.nomadzCore as Program<NomadzCore>;
 
-  const newConfigFeeVault = new PublicKey('7xNVSwWDc9gBvWtakCG9Vdy1ETPMk3sGTYW28XoGDof9');
-  const newConfigMintSoulboundFee = 0.2 * LAMPORTS_PER_SOL; // 0.2 SOL
+  const newConfigFeeVault = new PublicKey('CwKJ22GahUScYc5m63gdtfyKLg8Hg8DuzBjwCBdprqv5');
+  const newConfigMintSoulboundFee = 0.005 * LAMPORTS_PER_SOL; // 0.2 SOL
 
   let wallet: Keypair;
 
   before(async () => {
     wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ''));
 
-    await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
-    await new Promise(res => setTimeout(res, 1000));
+    // await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
+    // await new Promise(res => setTimeout(res, 1000));
     console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
   });
 
   it('Updates the config data', async () => {
-    const configPdaStr = getAccount<string>('config');
-    if (!configPdaStr) throw new Error('Missing config address');
-    const configPda = new PublicKey(configPdaStr);
+    const [configPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from('config_v2')],
+      program.programId,
+    );
 
     const before = await program.account.config.fetch(configPda);
     console.log('Before update:', before);
@@ -42,9 +43,9 @@ describe('update config', () => {
 
     const tx = await program.methods
       .updateConfig({
-        lvlPercentages: newLvlPercentages,
+        lvlPercentages: null,
         mintSoulboundFee: new BN(newConfigMintSoulboundFee),
-        admin: wallet.publicKey,
+        admin: null,
         feeVault: newConfigFeeVault,
       })
       .accounts({

@@ -5,13 +5,13 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-nomadz_core = "4txebCh2gA8ExzDNLY9njfstKbWvr1T4dJ7dBditQsQk"
+nomadz_core = "7HyBnvbLHyXBZkFLFe3F8mrHsCurAqSFDzEcGfgw7yo7"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
+cluster = "Mainnet"
 wallet = "deploy.json"
 
 [scripts]

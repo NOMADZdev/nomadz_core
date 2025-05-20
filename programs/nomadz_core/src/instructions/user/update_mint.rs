@@ -1,5 +1,6 @@
 use crate::{
-    errors::config::InitializeErrorCode, state::config::config::Config,
+    errors::config::InitializeErrorCode,
+    state::config::config::Config,
     state::soulbound::asset_data::UserAssetData,
 };
 use anchor_lang::prelude::*;
@@ -13,7 +14,7 @@ pub fn update_user_mint(
     luck: u8,
     rxp: u64,
     rlevel: u8,
-    rluck: u8,
+    rluck: u8
 ) -> Result<()> {
     require_keys_eq!(
         ctx.accounts.admin.key(),
@@ -32,13 +33,7 @@ pub fn update_user_mint(
     referrer_asset.level = rlevel;
     referrer_asset.luck = rluck;
 
-    msg!(
-        "Updated stats for {}: XP={}, Level={}, Luck={}",
-        user_asset_data.user,
-        xp,
-        level,
-        luck
-    );
+    msg!("Updated stats for {}: XP={}, Level={}, Luck={}", user_asset_data.user, xp, level, luck);
 
     Ok(())
 }
@@ -61,10 +56,7 @@ pub struct UpdateUserMint<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
 
-    #[account(
-        seeds = [b"config"],
-        bump,
-    )]
+    #[account(seeds = [b"config_v2"], bump)]
     pub config: Account<'info, Config>,
 
     #[account(address = crate::ID)]

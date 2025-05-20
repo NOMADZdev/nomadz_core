@@ -1,35 +1,31 @@
-import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
-import { PublicKey, SystemProgram, Keypair } from "@solana/web3.js";
-import { NomadzCore } from "../../../target/types/nomadz_core";
-import { getAccount } from "../../../utils/account_utils";
-import * as dotenv from "dotenv";
-import * as assert from "assert";
-import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
+import * as anchor from '@coral-xyz/anchor';
+import { Program } from '@coral-xyz/anchor';
+import { PublicKey, SystemProgram, Keypair } from '@solana/web3.js';
+import { NomadzCore } from '../../../target/types/nomadz_core';
+import { getAccount } from '../../../utils/account_utils';
+import * as dotenv from 'dotenv';
+import * as assert from 'assert';
+import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 
 dotenv.config();
 
-describe("update user stats with referral XP rewards", () => {
+describe('update user stats with referral XP rewards', () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   let wallet: Keypair;
   before(async () => {
-    wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ""));
+    wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ''));
 
     await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
-    await new Promise((res) => setTimeout(res, 1000));
-    console.log(
-      await connection.getBalance(
-        new PublicKey(process.env.ADMIN_PUBLIC_KEY || ""),
-      ),
-    );
+    await new Promise(res => setTimeout(res, 1000));
+    console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
   });
   const connection = provider.connection;
   const program = anchor.workspace.nomadzCore as Program<NomadzCore>;
 
-  const userId = "userC";
-  const level1Id = "userB";
-  const level2Id = "userA";
+  const userId = 'userC';
+  const level1Id = 'userB';
+  const level2Id = 'userA';
 
   let userCPubkey: PublicKey;
   let userBPubkey: PublicKey;
@@ -49,52 +45,30 @@ describe("update user stats with referral XP rewards", () => {
       userAPubkey = new PublicKey(level2Idstr);
     }
 
-    [configPda] = PublicKey.findProgramAddressSync(
-      [Buffer.from("config")],
-      program.programId,
-    );
+    [configPda] = PublicKey.findProgramAddressSync([Buffer.from('config_v2')], program.programId);
 
     [userAssetAccount] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("user_asset_data"),
-        Buffer.from(userId),
-        program.programId.toBytes(),
-      ],
+      [Buffer.from('user_asset_data'), Buffer.from(userId), program.programId.toBytes()],
       program.programId,
     );
 
     [level1Account] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("user_asset_data"),
-        Buffer.from(level1Id),
-        program.programId.toBytes(),
-      ],
+      [Buffer.from('user_asset_data'), Buffer.from(level1Id), program.programId.toBytes()],
       program.programId,
     );
 
     [level2Account] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("user_asset_data"),
-        Buffer.from(level2Id),
-        program.programId.toBytes(),
-      ],
+      [Buffer.from('user_asset_data'), Buffer.from(level2Id), program.programId.toBytes()],
       program.programId,
     );
   });
 
-  const initUser = async (
-    user: Keypair,
-    userId: string,
-  ): Promise<PublicKey> => {
+  const initUser = async (user: Keypair, userId: string): Promise<PublicKey> => {
     await connection.requestAirdrop(user.publicKey, 1_000_000_000);
-    await new Promise((res) => setTimeout(res, 1000));
+    await new Promise(res => setTimeout(res, 1000));
 
     const [userAssetAccount] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("user_asset_data"),
-        Buffer.from(userId),
-        program.programId.toBytes(),
-      ],
+      [Buffer.from('user_asset_data'), Buffer.from(userId), program.programId.toBytes()],
       program.programId,
     );
 
@@ -119,12 +93,12 @@ describe("update user stats with referral XP rewards", () => {
   const userD = Keypair.generate();
   const userF = Keypair.generate();
 
-  const userAId = "userA";
-  const userBId = "userB";
-  const userCId = "userC";
-  const userDId = "userD";
-  const userFId = "userF";
-  it("builds 2 referral branches and distributes XP", async () => {
+  const userAId = 'userA';
+  const userBId = 'userB';
+  const userCId = 'userC';
+  const userDId = 'userD';
+  const userFId = 'userF';
+  it('builds 2 referral branches and distributes XP', async () => {
     const updateXP = new anchor.BN(175000);
     const newLevel = 10;
     const newLuck = 42;
@@ -216,8 +190,8 @@ describe("update user stats with referral XP rewards", () => {
       .signers([wallet])
       .rpc();
 
-    console.log("Link: ", tx);
-    console.log("Link: ", tx2);
+    console.log('Link: ', tx);
+    console.log('Link: ', tx2);
 
     const afterA = await program.account.userAssetData.fetch(accA);
     const afterB = await program.account.userAssetData.fetch(accB);
@@ -229,20 +203,16 @@ describe("update user stats with referral XP rewards", () => {
     const deltaB = afterB.xp.toNumber() - beforeB.xp.toNumber(); // +20 from C
     const deltaD = afterD.xp.toNumber() - beforeD.xp.toNumber(); // +20 from F
 
-    console.log("XP A gained:", deltaA); // 20
-    console.log("XP B gained:", deltaB); // 20
-    console.log("XP D gained:", deltaD); // 20
-    console.log("XP C:", afterC.xp.toNumber()); // 200 (100 base + 100 update)
-    console.log("XP F:", afterF.xp.toNumber()); // 200
+    console.log('XP A gained:', deltaA); // 20
+    console.log('XP B gained:', deltaB); // 20
+    console.log('XP D gained:', deltaD); // 20
+    console.log('XP C:', afterC.xp.toNumber()); // 200 (100 base + 100 update)
+    console.log('XP F:', afterF.xp.toNumber()); // 200
 
     assert.strictEqual(afterC.xp.toNumber(), 175000); // 100 initial + 100 update
     assert.strictEqual(afterF.xp.toNumber(), 175000); // 100 initial + 100 update
-    assert.strictEqual(
-      deltaA,
-      7500,
-      "A should receive 10 from C and 10 from F",
-    );
-    assert.strictEqual(deltaB, 7500, "B should receive 10 from C");
-    assert.strictEqual(deltaD, 7500, "D should receive 10 from F");
+    assert.strictEqual(deltaA, 7500, 'A should receive 10 from C and 10 from F');
+    assert.strictEqual(deltaB, 7500, 'B should receive 10 from C');
+    assert.strictEqual(deltaD, 7500, 'D should receive 10 from F');
   });
 });

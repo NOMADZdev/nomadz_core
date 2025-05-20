@@ -21,16 +21,16 @@ describe('initialize', () => {
   anchor.setProvider(provider);
 
   // const wallet = provider.wallet.payer as anchor.web3.Keypair;
-  const configFeeVault = new PublicKey('7xNVSwWDc9gBvWtakCG9Vdy1ETPMk3sGTYW28XoGDof9');
-  const configMintSoulboundFee = 0.1 * LAMPORTS_PER_SOL; // 0.1 SOL
+  const configFeeVault = new PublicKey('CwKJ22GahUScYc5m63gdtfyKLg8Hg8DuzBjwCBdprqv5');
+  const configMintSoulboundFee = 0.005 * LAMPORTS_PER_SOL; // 0.2 SOL
   let wallet: Keypair;
 
   before(async () => {
     wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ''));
 
     saveAccount('configFeeVault', configFeeVault.toBase58());
-    await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
-    await new Promise(res => setTimeout(res, 1000));
+    // await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
+    // await new Promise(res => setTimeout(res, 1000));
     console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
   });
 
@@ -46,7 +46,7 @@ describe('initialize', () => {
     }
 
     const [configPda] = PublicKey.findProgramAddressSync(
-      [Buffer.from('config')],
+      [Buffer.from('config_v2')],
       program.programId,
     );
 
@@ -77,7 +77,7 @@ describe('initialize', () => {
     const account = await program.account.config.fetch(configPda);
     console.log('Fetched Config:', account);
 
-    saveAccount('config', configPda.toBase58());
+    saveAccount('config_v2', configPda.toBase58());
 
     assert.ok(account.admin.equals(wallet.publicKey), 'Admin should match wallet public key');
     assert.ok(

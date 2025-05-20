@@ -1,5 +1,6 @@
 use crate::{
-    errors::config::InitializeErrorCode, state::config::config::Config,
+    errors::config::InitializeErrorCode,
+    state::config::config::Config,
     state::soulbound::asset_data::UserAssetData,
 };
 use anchor_lang::prelude::*;
@@ -9,7 +10,7 @@ pub fn initialize_user_asset_data_handler(
     _: String,
     xp: u64,
     level: u8,
-    luck: u8,
+    luck: u8
 ) -> Result<()> {
     require_keys_eq!(
         ctx.accounts.admin.key(),
@@ -26,10 +27,7 @@ pub fn initialize_user_asset_data_handler(
     user_asset_data.level = level;
     user_asset_data.luck = luck;
 
-    msg!(
-        "UserAssetData initialized for user: {}",
-        user_asset_data.user
-    );
+    msg!("UserAssetData initialized for user: {}", user_asset_data.user);
     Ok(())
 }
 
@@ -41,7 +39,7 @@ pub struct InitializeUserAssetData<'info> {
         payer = admin,
         space = UserAssetData::MAX_SIZE,
         seeds = [b"user_asset_data", user_id.as_bytes(), nomadz_program.key().as_ref()],
-        bump,
+        bump
     )]
     pub user_asset_data: Account<'info, UserAssetData>,
 
@@ -51,10 +49,7 @@ pub struct InitializeUserAssetData<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
 
-    #[account(
-        seeds = [b"config"],
-        bump,
-    )]
+    #[account(seeds = [b"config_v2"], bump)]
     pub config: Account<'info, Config>,
 
     #[account(address = crate::ID)]

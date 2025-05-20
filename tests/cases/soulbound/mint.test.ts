@@ -50,7 +50,7 @@ describe('mint soulbound', () => {
   });
 
   it('Mints a soulbound NFT', async () => {
-    const configPdaStr = getAccount<string>('config');
+    const configPdaStr = getAccount<string>('config_v2');
     if (!configPdaStr) throw new Error('Missing config address');
     const configPda = new PublicKey(configPdaStr);
 

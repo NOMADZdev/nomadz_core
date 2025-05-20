@@ -14,17 +14,16 @@ pub fn apply_referral_handler(ctx: Context<ApplyReferral>) -> Result<()> {
         ApplyReferralErrorCode::Unauthorized
     );
 
-    if user_asset_data
-        .referral_history
-        .iter()
-        .any(|entry| entry.referrer == referrer_asset_data.user)
+    if
+        user_asset_data.referral_history
+            .iter()
+            .any(|entry| entry.referrer == referrer_asset_data.user)
     {
         msg!("User already referred by this account");
         return Ok(());
     }
 
-    let mut updated_referrals: Vec<ReferralEntry> = referrer_asset_data
-        .referral_history
+    let mut updated_referrals: Vec<ReferralEntry> = referrer_asset_data.referral_history
         .iter()
         .map(|entry| entry.incremented())
         .collect();
@@ -58,6 +57,6 @@ pub struct ApplyReferral<'info> {
     #[account(address = config.admin)]
     pub authority: Signer<'info>,
 
-    #[account(seeds = [b"config"], bump)]
+    #[account(seeds = [b"config_v2"], bump)]
     pub config: Account<'info, Config>,
 }

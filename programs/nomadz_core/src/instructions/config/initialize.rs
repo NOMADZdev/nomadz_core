@@ -33,7 +33,7 @@ pub struct InitializeConfigArgs {
 #[derive(Accounts)]
 #[instruction(args: InitializeConfigArgs)]
 pub struct Initialize<'info> {
-    #[account(init, payer = initializer, seeds = [b"config"], space = Config::LEN, bump)]
+    #[account(init, payer = initializer, seeds = [b"config_v2"], space = Config::LEN, bump)]
     pub config: Account<'info, Config>,
 
     // #[account(mut, constraint = contains_address(&ALLOWED_INITIALIZE_PROGRAM_AUTHORITIES, &initializer.key()) @ InitializeErrorCode::Forbidden)]

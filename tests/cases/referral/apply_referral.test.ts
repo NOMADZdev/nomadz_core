@@ -34,8 +34,8 @@ describe('referral pipeline with XP from mint', () => {
     await new Promise(res => setTimeout(res, 1000));
     console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
     console.log(await connection.getBalance(userA.publicKey));
-    [configPda] = PublicKey.findProgramAddressSync([Buffer.from('config')], program.programId);
-    saveAccount('config', configPda.toBase58());
+    [configPda] = PublicKey.findProgramAddressSync([Buffer.from('config_v2')], program.programId);
+    saveAccount('config_v2', configPda.toBase58());
   });
 
   const initUserAssetData = async (user: Keypair, userId: string) => {

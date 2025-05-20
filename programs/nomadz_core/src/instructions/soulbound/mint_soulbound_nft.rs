@@ -150,7 +150,7 @@ pub struct MintSoulboundNFT<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
 
-    #[account(seeds = [b"config"], bump)]
+    #[account(seeds = [b"config_v2"], bump)]
     pub config: Account<'info, Config>,
 
     #[account(mut, constraint = fee_vault.key() == config.fee_vault @ MintSoulboundNftErrorCode::FeeVaultMismatch)]
