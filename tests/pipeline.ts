@@ -8,7 +8,7 @@ describe('Testing Pipeline', () => {
       'config/initialize.test.ts',
       // 'config/update.test.ts',
 
-      //referral
+      // referral
       // 'referral/apply_referral.test.ts',
       // 'referral/update_user.test.ts',
 

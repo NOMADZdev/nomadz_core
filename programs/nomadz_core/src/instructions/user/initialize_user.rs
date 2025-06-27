@@ -1,22 +1,20 @@
 use crate::{
-    errors::config::InitializeErrorCode,
-    state::config::config::Config,
-    state::soulbound::asset_data::UserAssetData,
+    errors::InitializeUserAssetDataErrorCode,
+    state::{ config::config::Config, soulbound::asset_data::UserAssetData },
 };
 use anchor_lang::prelude::*;
 
 pub fn initialize_user_asset_data_handler(
     ctx: Context<InitializeUserAssetData>,
-    _: String,
-    xp: u64,
-    level: u8,
-    luck: u8
+    args: InitializeUserAssetDataArgs
 ) -> Result<()> {
     require_keys_eq!(
         ctx.accounts.admin.key(),
         ctx.accounts.config.admin,
-        InitializeErrorCode::Forbidden
+        InitializeUserAssetDataErrorCode::Forbidden
     );
+
+    let InitializeUserAssetDataArgs { user_id: _, xp, level, luck } = args;
 
     let user_asset_data = &mut ctx.accounts.user_asset_data;
     user_asset_data.user = ctx.accounts.user.key();
@@ -31,14 +29,22 @@ pub fn initialize_user_asset_data_handler(
     Ok(())
 }
 
+#[derive(AnchorSerialize, AnchorDeserialize, PartialEq, Eq, Debug, Clone)]
+pub struct InitializeUserAssetDataArgs {
+    user_id: String,
+    xp: u64,
+    level: u8,
+    luck: u8,
+}
+
 #[derive(Accounts)]
-#[instruction(user_id: String)]
+#[instruction(args: InitializeUserAssetDataArgs)]
 pub struct InitializeUserAssetData<'info> {
     #[account(
         init_if_needed,
         payer = admin,
         space = UserAssetData::MAX_SIZE,
-        seeds = [b"user_asset_data", user_id.as_bytes(), nomadz_program.key().as_ref()],
+        seeds = [b"user_asset_data", args.user_id.as_bytes(), nomadz_program.key().as_ref()],
         bump
     )]
     pub user_asset_data: Account<'info, UserAssetData>,

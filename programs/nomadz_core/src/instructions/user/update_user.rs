@@ -1,33 +1,45 @@
 use crate::{
-    errors::config::InitializeErrorCode,
-    state::config::config::Config,
-    state::soulbound::asset_data::UserAssetData,
+    errors::UpdateUserAssetDataErrorCode,
+    state::{ config::config::Config, soulbound::asset_data::UserAssetData },
 };
 use anchor_lang::prelude::*;
 
-pub fn update_user_stats_handler(
-    ctx: Context<UpdateUserStats>,
-    _: String,
-    xp: u64,
-    level: u8,
-    luck: u8
+pub fn update_user_asset_data_handler(
+    ctx: Context<UpdateUserAssetData>,
+    args: UpdateUserAssetDataArgs
 ) -> Result<()> {
     require_keys_eq!(
         ctx.accounts.admin.key(),
         ctx.accounts.config.admin,
-        InitializeErrorCode::Forbidden
+        UpdateUserAssetDataErrorCode::Forbidden
     );
+
+    let UpdateUserAssetDataArgs { user_id: _, xp, level, luck } = args;
 
     let user_asset_data = &mut ctx.accounts.user_asset_data;
     let previous_xp = user_asset_data.xp;
 
-    user_asset_data.xp = xp;
-    user_asset_data.level = level;
-    user_asset_data.luck = luck;
+    if let Some(new_xp) = xp {
+        user_asset_data.xp = new_xp;
+    }
 
-    msg!("Updated stats for {}: XP={}, Level={}, Luck={}", user_asset_data.user, xp, level, luck);
+    if let Some(new_level) = level {
+        user_asset_data.level = new_level;
+    }
 
-    let gained_xp = xp.saturating_sub(previous_xp);
+    if let Some(new_luck) = luck {
+        user_asset_data.luck = new_luck;
+    }
+
+    msg!(
+        "Updated user asset data account info for {}: XP={}, Level={}, Luck={}",
+        user_asset_data.user,
+        user_asset_data.xp,
+        user_asset_data.level,
+        user_asset_data.luck
+    );
+
+    let gained_xp = user_asset_data.xp.saturating_sub(previous_xp);
     msg!("Gained XP: {}", gained_xp);
 
     if gained_xp > 0 {
@@ -40,11 +52,13 @@ pub fn update_user_stats_handler(
             };
 
             let reward = (gained_xp * (percentage as u64)) / 100;
+
             for acc_info in ctx.remaining_accounts.iter() {
                 msg!("Fetching for level 1 referrer: {}", acc_info.key());
                 let mut referrer_data = UserAssetData::try_deserialize(
                     &mut &acc_info.data.borrow()[..]
                 )?;
+
                 if entry.referrer.key() == acc_info.key() {
                     msg!(
                         "Rewarding referrer {} (level {}) with {} XP",
@@ -63,11 +77,19 @@ pub fn update_user_stats_handler(
     Ok(())
 }
 
+#[derive(AnchorSerialize, AnchorDeserialize, PartialEq, Eq, Debug, Clone)]
+pub struct UpdateUserAssetDataArgs {
+    user_id: String,
+    xp: Option<u64>,
+    level: Option<u8>,
+    luck: Option<u8>,
+}
+
 #[derive(Accounts)]
-#[instruction(user_id: String)]
-pub struct UpdateUserStats<'info> {
+#[instruction(args: UpdateUserAssetDataArgs)]
+pub struct UpdateUserAssetData<'info> {
     #[account(mut,
-        seeds = [b"user_asset_data", user_id.as_bytes(),  nomadz_program.key().as_ref()],
+        seeds = [b"user_asset_data", args.user_id.as_bytes(),  nomadz_program.key().as_ref()],
         bump,
     )]
     pub user_asset_data: Account<'info, UserAssetData>,

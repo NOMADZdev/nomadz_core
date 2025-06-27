@@ -33,7 +33,7 @@ describe('mint soulbound', () => {
   const connection = provider.connection;
   const program = anchor.workspace.nomadzCore as Program<NomadzCore>;
 
-  const userId = 'userA';
+  const userId = 'userB2';
   const mplCoreProgramId = new PublicKey('CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d');
 
   let wallet: Keypair;

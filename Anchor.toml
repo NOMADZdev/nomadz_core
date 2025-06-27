@@ -11,7 +11,7 @@ nomadz_core = "7HyBnvbLHyXBZkFLFe3F8mrHsCurAqSFDzEcGfgw7yo7"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Mainnet"
+cluster = "Localnet"
 wallet = "deploy.json"
 
 [scripts]
@@ -24,7 +24,7 @@ upgradeable = false
 
 [test.validator]
 bind_address = "0.0.0.0"
-url = "https://api.devnet.solana.com"
+url = "http://localhost:8899"
 ledger = ".anchor/test-ledger"
 rpc_port = 8899
 

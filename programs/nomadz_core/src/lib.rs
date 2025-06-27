@@ -20,36 +20,23 @@ pub mod nomadz_core {
 
     pub fn initialize_user_asset_data(
         ctx: Context<InitializeUserAssetData>,
-        user_id: String,
-        xp: u64,
-        level: u8,
-        luck: u8
+        args: InitializeUserAssetDataArgs
     ) -> Result<()> {
-        initialize_user_asset_data_handler(ctx, user_id, xp, level, luck)
+        instructions::initialize_user::initialize_user_asset_data_handler(ctx, args)
     }
 
     pub fn update_user_asset_data(
-        ctx: Context<UpdateUserStats>,
-        user_id: String,
-        xp: u64,
-        level: u8,
-        luck: u8
+        ctx: Context<UpdateUserAssetData>,
+        args: UpdateUserAssetDataArgs
     ) -> Result<()> {
-        update_user_stats_handler(ctx, user_id, xp, level, luck)
+        instructions::update_user::update_user_asset_data_handler(ctx, args)
     }
 
-    pub fn update_mint(
-        ctx: Context<UpdateUserMint>,
-        user_id: String,
-        referrer_id: String,
-        xp: u64,
-        level: u8,
-        luck: u8,
-        rxp: u64,
-        rlevel: u8,
-        rluck: u8
+    pub fn update_user_with_referrer(
+        ctx: Context<UpdateUserWithReferrer>,
+        args: UpdateUserWithReferrerArgs
     ) -> Result<()> {
-        update_user_mint(ctx, user_id, referrer_id, xp, level, luck, rxp, rlevel, rluck)
+        instructions::update_user_with_referrer::update_user_with_referrer_handler(ctx, args)
     }
 
     pub fn update_config(ctx: Context<UpdateConfig>, args: UpdateConfigArgs) -> Result<()> {

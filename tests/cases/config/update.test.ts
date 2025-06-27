@@ -39,7 +39,7 @@ describe('update config', () => {
     const before = await program.account.config.fetch(configPda);
     console.log('Before update:', before);
 
-    const newLvlPercentages: [number, number] = [15, 35];
+    const newLvlPercentages: [number, number] = [10, 5];
 
     const tx = await program.methods
       .updateConfig({

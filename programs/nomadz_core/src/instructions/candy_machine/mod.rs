@@ -1,1 +1,1 @@
-pub mod create_candy_machine;
+pub mod initialize_candy_machine;

@@ -73,7 +73,12 @@ describe('update user stats with referral XP rewards', () => {
     );
 
     await program.methods
-      .initializeUserAssetData(userId, new anchor.BN(100000), 1, 0)
+      .initializeUserAssetData({
+        userId,
+        xp: new anchor.BN(100000),
+        level: 1,
+        luck: 0,
+      })
       .accounts({
         userAssetData: userAssetAccount,
         user: user.publicKey,
@@ -160,7 +165,12 @@ describe('update user stats with referral XP rewards', () => {
 
     // Update user C
     const tx = await program.methods
-      .updateUserAssetData(userCId, updateXP, newLevel, newLuck)
+      .updateUserAssetData({
+        userId: userCId,
+        xp: updateXP,
+        level: newLevel,
+        luck: newLuck,
+      })
       .accounts({
         userAssetData: accC,
         admin: wallet.publicKey,
@@ -176,7 +186,12 @@ describe('update user stats with referral XP rewards', () => {
 
     // Update user F
     const tx2 = await program.methods
-      .updateUserAssetData(userFId, updateXP, newLevel, newLuck)
+      .updateUserAssetData({
+        userId: userFId,
+        xp: updateXP,
+        level: newLevel,
+        luck: newLuck,
+      })
       .accounts({
         userAssetData: accF,
         admin: wallet.publicKey,

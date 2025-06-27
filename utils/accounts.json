@@ -1,9 +1,12 @@
 {
   "config_v2": "BL7mZsTXuj2H5zcjEZiZnJ3MfLjiT8SUMGRSAnXJ37Ro",
   "configFeeVault": "CwKJ22GahUScYc5m63gdtfyKLg8Hg8DuzBjwCBdprqv5",
-  "userA": "BiiRruRFEweo6aCA5RKAum4XDH8EjPkWUkQGVxzsytUc",
-  "userB": "3kgemBLGvVtvNeKkJukRVQW3P8g5PQdRvbrdKtMaubLq",
-  "userC": "Gh2ob4PD2VNG27wpS5q5RESTQuUCKmgR1TAs4gGSKuSA",
-  "assetAccount": "EVFryM49jq3sUZaD8pdEs86JfFqhomRAAGZvhaEeuRKc",
-  "userAssetAccount": "BiiRruRFEweo6aCA5RKAum4XDH8EjPkWUkQGVxzsytUc"
+  "userA": "Agr1omHpm2TYMiri8DSgA9ai5Rc1azU7E1EcQGmP4LTt",
+  "userB": "4gVuWMgJRq3HnKgdMakdsyHyRQDcAqp18LXRX8L2pQYQ",
+  "userC": "3HJK82afcxrWZ8AajdbZaRgX3h9myEnnfN2JZNDaaRJT",
+  "assetAccount": "fwa1UAYPYnyTVsBhQYxjhHNs9tATVBQTXMVoUXQExeV",
+  "userAssetAccount": "DNui5xdk8NK9DejkUVbUa7j3am5mtUZb89FgDtTVYU1m",
+  "userA2": "2p21jpDe8UoGjFmfySpH7VwT8Y6bPfQ3iDcsxVq3655Q",
+  "userB2": "DNui5xdk8NK9DejkUVbUa7j3am5mtUZb89FgDtTVYU1m",
+  "userC2": "2oyab99UHByXffDNKTeFz6mRjutQc3pRsunxdUJirrhC"
 }

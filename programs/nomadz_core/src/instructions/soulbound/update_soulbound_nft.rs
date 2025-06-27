@@ -5,7 +5,7 @@ use crate::errors::UpdateSoulboundNftErrorCode;
 
 pub fn update_soulbound_nft_handler(
     ctx: Context<UpdateSoulboundNFT>,
-    args: UpdateSoulboundNFTArgs,
+    args: UpdateSoulboundNFTArgs
 ) -> Result<()> {
     let UpdateSoulboundNFTArgs { new_uri, user_id } = args;
 
@@ -20,19 +20,23 @@ pub fn update_soulbound_nft_handler(
     let asset_authority_info = asset_authority.to_account_info();
     let admin_info = admin.to_account_info();
 
-    let asset_account_seeds: &[&[&[u8]]] = &[&[
-        b"soulbound_asset",
-        &user_id.as_bytes(),
-        &nomadz_program.key().to_bytes(),
-        &[ctx.bumps.asset_account],
-    ]];
+    let asset_account_seeds: &[&[&[u8]]] = &[
+        &[
+            b"soulbound_asset",
+            &user_id.as_bytes(),
+            &nomadz_program.key().to_bytes(),
+            &[ctx.bumps.asset_account],
+        ],
+    ];
 
-    let asset_authority_seeds: &[&[&[u8]]] = &[&[
-        b"asset_authority",
-        &nomadz_program.key().to_bytes(),
-        &asset_account.key().to_bytes(),
-        &[ctx.bumps.asset_authority],
-    ]];
+    let asset_authority_seeds: &[&[&[u8]]] = &[
+        &[
+            b"asset_authority",
+            &nomadz_program.key().to_bytes(),
+            &asset_account.key().to_bytes(),
+            &[ctx.bumps.asset_authority],
+        ],
+    ];
 
     let mut builder = UpdateV2CpiBuilder::new(mpl_core_program);
     let mut builder = builder
@@ -51,6 +55,7 @@ pub fn update_soulbound_nft_handler(
 
     Ok(())
 }
+
 #[derive(AnchorSerialize, AnchorDeserialize, PartialEq, Eq, Debug, Clone)]
 pub struct UpdateSoulboundNFTArgs {
     new_uri: Option<String>,

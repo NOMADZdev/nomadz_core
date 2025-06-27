@@ -22,7 +22,7 @@ describe('update soulbound', () => {
   const connection = provider.connection;
   const program = anchor.workspace.nomadzCore as Program<NomadzCore>;
 
-  const userId = 'aboba1488';
+  const userId = 'userB2';
 
   let wallet: Keypair;
 

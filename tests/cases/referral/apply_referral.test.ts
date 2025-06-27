@@ -52,7 +52,13 @@ describe('referral pipeline with XP from mint', () => {
     const newLuck = 42;
 
     await program.methods
-      .initializeUserAssetData(userId, newXP, newLevel, newLuck)
+      // .initializeUserAssetData(userId, newXP, newLevel, newLuck)
+      .initializeUserAssetData({
+        userId,
+        xp: newXP,
+        level: newLevel,
+        luck: newLuck,
+      })
       .accounts({
         userAssetData: userAssetAccount,
         user: user.publicKey,
@@ -162,10 +168,19 @@ describe('referral pipeline with XP from mint', () => {
     const nupdateXP = new anchor.BN(150);
 
     const tx2 = await program.methods
-      .updateMint(userCId, userBId, nupdateXP, 1, 0, nupdateXP, 1, 0)
+      .updateUserWithReferrer({
+        userId: userCId,
+        referrerId: userBId,
+        userXp: nupdateXP,
+        userLevel: 1,
+        userLuck: 0,
+        referrerXp: nupdateXP,
+        referrerLevel: 1,
+        referrerLuck: 0,
+      })
       .accounts({
         userAssetData: userCAcc,
-        referrerAsset: userBAcc,
+        referrerAssetData: userBAcc,
         admin: wallet.publicKey,
         config: configPda,
         nomadzProgram: program.programId,
