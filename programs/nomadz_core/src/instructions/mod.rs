@@ -1,4 +1,3 @@
-pub mod candy_machine;
 pub mod config;
 pub mod referral;
 pub mod soulbound;

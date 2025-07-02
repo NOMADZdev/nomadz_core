@@ -12,3 +12,6 @@ codegen-units = 1
 opt-level = 3
 incremental = false
 codegen-units = 1
+
+[patch.crates-io]
+mpl-candy-machine-core = { git = "https://github.com/NOMADZdev/mpl-candy-machine.git", branch = "main" }
