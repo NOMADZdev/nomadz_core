@@ -22,6 +22,7 @@ pub fn mint_soulbound_nft_handler(
     let user_asset_data = &mut ctx.accounts.user_asset_data;
     let asset_account = &ctx.accounts.asset_account;
     let user = &ctx.accounts.user;
+    let payer = &ctx.accounts.payer;
     let asset_authority = &ctx.accounts.asset_authority;
     let mpl_core_program = &ctx.accounts.mpl_core_program;
     let system_program = &ctx.accounts.system_program;
@@ -34,6 +35,7 @@ pub fn mint_soulbound_nft_handler(
     let asset_account_info = asset_account.to_account_info();
     let asset_authority_account_info = asset_authority.to_account_info();
     let user_account_info = user.to_account_info();
+    let payer_account_info = payer.to_account_info();
 
     let asset_account_seeds: &[&[&[u8]]] = &[
         &[
@@ -54,17 +56,17 @@ pub fn mint_soulbound_nft_handler(
     ];
 
     let transfer_cpi_context = CpiContext::new(system_program.to_account_info(), Transfer {
-        from: user_account_info.clone(),
+        from: payer_account_info.clone(),
         to: fee_vault.to_account_info(),
     });
 
     msg!(
-        "User account balance: {:?}, required mint soulbound fee: {:?}",
-        user.lamports(),
+        "Payer account balance: {:?}, required mint soulbound fee: {:?}",
+        payer.lamports(),
         config.mint_soulbound_fee
     );
     require_gt!(
-        user.lamports(),
+        payer.lamports(),
         config.mint_soulbound_fee,
         MintSoulboundNftErrorCode::InsufficientBalance
     );
@@ -77,7 +79,7 @@ pub fn mint_soulbound_nft_handler(
         .name(String::from("NOMADZ Soulbound"))
         .uri(uri.clone())
         .authority(Some(&asset_authority_account_info))
-        .payer(&user_account_info)
+        .payer(&payer_account_info)
         .owner(Some(&user_account_info))
         .update_authority(Some(&asset_authority_account_info))
         .system_program(system_program)
@@ -105,7 +107,7 @@ pub struct MintSoulboundNFTArgs {
 #[instruction(args: MintSoulboundNFTArgs)]
 pub struct MintSoulboundNFT<'info> {
     #[account(mut,
-        seeds = [b"user_asset_data", args.user_id.as_bytes(),  nomadz_program.key().as_ref()],
+        seeds = [b"user_asset_data", args.user_id.as_bytes(), nomadz_program.key().as_ref()],
         bump,
     )]
     pub user_asset_data: Account<'info, UserAssetData>,
@@ -127,12 +129,15 @@ pub struct MintSoulboundNFT<'info> {
     pub asset_authority: UncheckedAccount<'info>,
 
     #[account(mut)]
-    pub user: Signer<'info>,
+    pub payer: Signer<'info>,
+
+    #[account(mut)]
+    pub user: UncheckedAccount<'info>,
 
     #[account(mut)]
     pub admin: Signer<'info>,
 
-    #[account(seeds = [b"config_v2"], bump)]
+    #[account(seeds = [b"config"], bump)]
     pub config: Account<'info, Config>,
 
     #[account(mut, constraint = fee_vault.key() == config.fee_vault @ MintSoulboundNftErrorCode::FeeVaultMismatch)]

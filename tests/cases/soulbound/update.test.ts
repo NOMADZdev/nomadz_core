@@ -22,15 +22,15 @@ describe('update soulbound', () => {
   const connection = provider.connection;
   const program = anchor.workspace.nomadzCore as Program<NomadzCore>;
 
-  const userId = 'userB2';
+  const userId = 'userB';
 
   let wallet: Keypair;
 
   before(async () => {
     wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ''));
 
-    await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
-    await new Promise(res => setTimeout(res, 1000));
+    // await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
+    // await new Promise(res => setTimeout(res, 1000));
     console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
   });
 

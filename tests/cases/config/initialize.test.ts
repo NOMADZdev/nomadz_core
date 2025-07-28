@@ -1,7 +1,6 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 import * as assert from 'assert';
-
 import {
   Keypair,
   LAMPORTS_PER_SOL,
@@ -9,13 +8,13 @@ import {
   sendAndConfirmTransaction,
   SystemProgram,
 } from '@solana/web3.js';
-
 import { NomadzCore } from '../../../target/types/nomadz_core';
 import { getAccount, saveAccount } from '../../../utils/account_utils';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
+
 describe('initialize', () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
@@ -46,7 +45,7 @@ describe('initialize', () => {
     }
 
     const [configPda] = PublicKey.findProgramAddressSync(
-      [Buffer.from('config_v2')],
+      [Buffer.from('config')],
       program.programId,
     );
 
@@ -77,7 +76,7 @@ describe('initialize', () => {
     const account = await program.account.config.fetch(configPda);
     console.log('Fetched Config:', account);
 
-    saveAccount('config_v2', configPda.toBase58());
+    saveAccount('config', configPda.toBase58());
 
     assert.ok(account.admin.equals(wallet.publicKey), 'Admin should match wallet public key');
     assert.ok(

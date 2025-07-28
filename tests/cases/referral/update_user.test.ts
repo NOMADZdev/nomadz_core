@@ -1,6 +1,12 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
-import { PublicKey, SystemProgram, Keypair } from '@solana/web3.js';
+import {
+  PublicKey,
+  SystemProgram,
+  Keypair,
+  ComputeBudgetProgram,
+  Transaction,
+} from '@solana/web3.js';
 import { NomadzCore } from '../../../target/types/nomadz_core';
 import { getAccount } from '../../../utils/account_utils';
 import * as dotenv from 'dotenv';
@@ -16,8 +22,8 @@ describe('update user stats with referral XP rewards', () => {
   before(async () => {
     wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ''));
 
-    await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
-    await new Promise(res => setTimeout(res, 1000));
+    // await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
+    // await new Promise(res => setTimeout(res, 1000));
     console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
   });
   const connection = provider.connection;
@@ -45,7 +51,7 @@ describe('update user stats with referral XP rewards', () => {
       userAPubkey = new PublicKey(level2Idstr);
     }
 
-    [configPda] = PublicKey.findProgramAddressSync([Buffer.from('config_v2')], program.programId);
+    [configPda] = PublicKey.findProgramAddressSync([Buffer.from('config')], program.programId);
 
     [userAssetAccount] = PublicKey.findProgramAddressSync(
       [Buffer.from('user_asset_data'), Buffer.from(userId), program.programId.toBytes()],
@@ -114,8 +120,11 @@ describe('update user stats with referral XP rewards', () => {
     const accD = await initUser(userD, userDId);
     const accF = await initUser(userF, userFId);
 
-    // Apply referrals
-    await program.methods
+    const computeIx = ComputeBudgetProgram.setComputeUnitLimit({
+      units: 300_000,
+    });
+
+    const ix1 = await program.methods
       .applyReferral()
       .accounts({
         userAssetData: accB,
@@ -123,10 +132,9 @@ describe('update user stats with referral XP rewards', () => {
         authority: wallet.publicKey,
         config: configPda,
       })
-      .signers([wallet])
-      .rpc();
+      .instruction();
 
-    await program.methods
+    const ix2 = await program.methods
       .applyReferral()
       .accounts({
         userAssetData: accC,
@@ -134,10 +142,9 @@ describe('update user stats with referral XP rewards', () => {
         authority: wallet.publicKey,
         config: configPda,
       })
-      .signers([wallet])
-      .rpc();
+      .instruction();
 
-    await program.methods
+    const ix3 = await program.methods
       .applyReferral()
       .accounts({
         userAssetData: accD,
@@ -145,10 +152,9 @@ describe('update user stats with referral XP rewards', () => {
         authority: wallet.publicKey,
         config: configPda,
       })
-      .signers([wallet])
-      .rpc();
+      .instruction();
 
-    await program.methods
+    const ix4 = await program.methods
       .applyReferral()
       .accounts({
         userAssetData: accF,
@@ -156,8 +162,11 @@ describe('update user stats with referral XP rewards', () => {
         authority: wallet.publicKey,
         config: configPda,
       })
-      .signers([wallet])
-      .rpc();
+      .instruction();
+
+    // Build transaction manually
+    const applyReferralTxs = new Transaction().add(computeIx).add(ix1).add(ix2).add(ix3).add(ix4);
+    await provider.sendAndConfirm(applyReferralTxs, [wallet]);
 
     const beforeA = await program.account.userAssetData.fetch(accA);
     const beforeB = await program.account.userAssetData.fetch(accB);

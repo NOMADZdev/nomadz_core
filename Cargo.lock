@@ -1310,6 +1310,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "anyhow",
+ "bytemuck",
  "mpl-core",
  "solana-program",
  "spl-associated-token-account",
@@ -2712,8 +2713,3 @@ dependencies = [
  "quote",
  "syn 2.0.104",
 ]
-
-[[patch.unused]]
-name = "mpl-candy-machine-core"
-version = "3.0.1"
-source = "git+https://github.com/NOMADZdev/mpl-candy-machine.git?branch=main#4d637e6db988704b232834b878dfce4e449c1045"

@@ -6,8 +6,9 @@ pub struct Config {
     pub mint_soulbound_fee: u64,
     pub admin: Pubkey,
     pub fee_vault: Pubkey,
+    pub padding: [u8; 512],
 }
 
 impl Config {
-    pub const LEN: usize = 8 + 2 + 8 + 32 + 32;
+    pub const LEN: usize = 8 + 2 + 8 + 32 + 32 + 512;
 }

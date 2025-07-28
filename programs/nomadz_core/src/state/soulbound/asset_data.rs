@@ -10,16 +10,11 @@ pub struct UserAssetData {
     pub xp: u64,
     pub level: u8,
     pub luck: u8,
+    pub padding: [u8; 512],
 }
 
 impl UserAssetData {
     pub const MAX_REFERRED: usize = 2;
-    pub const MAX_SIZE: usize = 8  // discriminator
-        + 32                      // user
-        + 32                      // asset
-        + 4 + Self::MAX_REFERRED * (32 + 1) // referral_history: Vec<ReferralEntry>
-        + 8                       // created_at
-        + 8                       // xp
-        + 1                       // level
-        + 1; // luck
+    pub const LEN: usize =
+        8 + 32 + 32 + 4 + Self::MAX_REFERRED * ReferralEntry::LEN + 8 + 8 + 1 + 1 + 512;
 }

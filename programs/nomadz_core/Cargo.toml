@@ -25,3 +25,4 @@ spl-token = "4.0.0"
 spl-associated-token-account = "2.2.0"
 anchor-spl = { version = "0.29.0", features = ["metadata"] }
 anyhow = "1.0.98"
+bytemuck = "1.23.1"

@@ -97,7 +97,7 @@ pub struct UpdateUserAssetData<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
 
-    #[account(seeds = [b"config_v2"], bump)]
+    #[account(seeds = [b"config"], bump)]
     pub config: Account<'info, Config>,
 
     #[account(address = crate::ID)]

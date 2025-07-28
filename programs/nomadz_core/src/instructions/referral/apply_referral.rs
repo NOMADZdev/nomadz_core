@@ -37,11 +37,14 @@ pub fn apply_referral_handler(ctx: Context<ApplyReferral>) -> Result<()> {
 
     user_asset_data.referral_history = updated_referrals;
 
-    msg!(
-        "User {} updated referral history: {:?}",
-        user_asset_data.user,
-        user_asset_data.referral_history
-    );
+    msg!("User {} updated referral history:", user_asset_data.user);
+
+    user_asset_data.referral_history
+        .iter()
+        .enumerate()
+        .for_each(|(index, referral)| {
+            msg!("Referral {} | referrer: {}, level {}", index, referral.referrer, referral.level);
+        });
 
     Ok(())
 }
@@ -57,6 +60,6 @@ pub struct ApplyReferral<'info> {
     #[account(address = config.admin)]
     pub authority: Signer<'info>,
 
-    #[account(seeds = [b"config_v2"], bump)]
+    #[account(seeds = [b"config"], bump)]
     pub config: Account<'info, Config>,
 }

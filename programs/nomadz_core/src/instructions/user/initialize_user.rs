@@ -43,7 +43,7 @@ pub struct InitializeUserAssetData<'info> {
     #[account(
         init_if_needed,
         payer = admin,
-        space = UserAssetData::MAX_SIZE,
+        space = UserAssetData::LEN,
         seeds = [b"user_asset_data", args.user_id.as_bytes(), nomadz_program.key().as_ref()],
         bump
     )]
@@ -55,7 +55,7 @@ pub struct InitializeUserAssetData<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
 
-    #[account(seeds = [b"config_v2"], bump)]
+    #[account(seeds = [b"config"], bump)]
     pub config: Account<'info, Config>,
 
     #[account(address = crate::ID)]

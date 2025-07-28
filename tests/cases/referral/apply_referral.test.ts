@@ -1,12 +1,19 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
-import { PublicKey, SystemProgram, Keypair } from '@solana/web3.js';
+import {
+  PublicKey,
+  SystemProgram,
+  Keypair,
+  Transaction,
+  ComputeBudgetProgram,
+} from '@solana/web3.js';
 import { NomadzCore } from '../../../target/types/nomadz_core';
 import { getAccount, saveAccount } from '../../../utils/account_utils';
 import * as dotenv from 'dotenv';
 import * as assert from 'assert';
-dotenv.config();
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
+
+dotenv.config();
 
 describe('referral pipeline with XP from mint', () => {
   const provider = anchor.AnchorProvider.env();
@@ -34,8 +41,8 @@ describe('referral pipeline with XP from mint', () => {
     await new Promise(res => setTimeout(res, 1000));
     console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
     console.log(await connection.getBalance(userA.publicKey));
-    [configPda] = PublicKey.findProgramAddressSync([Buffer.from('config_v2')], program.programId);
-    saveAccount('config_v2', configPda.toBase58());
+    [configPda] = PublicKey.findProgramAddressSync([Buffer.from('config')], program.programId);
+    saveAccount('config', configPda.toBase58());
   });
 
   const initUserAssetData = async (user: Keypair, userId: string) => {
@@ -110,6 +117,7 @@ describe('referral pipeline with XP from mint', () => {
         assetAccount,
         assetAuthority,
         user: user.publicKey,
+        payer: user.publicKey,
         admin: wallet.publicKey,
         config: configPda,
         nomadzProgram: program.programId,
@@ -133,8 +141,12 @@ describe('referral pipeline with XP from mint', () => {
     saveAccount('userB', userBAcc.toBase58());
     saveAccount('userC', userCAcc.toBase58());
 
-    // B is referred by A
-    await program.methods
+    const computeIx = ComputeBudgetProgram.setComputeUnitLimit({
+      units: 300_000,
+    });
+
+    // Instruction for B is referred by A
+    const applyReferralB = await program.methods
       .applyReferral()
       .accounts({
         userAssetData: userBAcc,
@@ -142,11 +154,10 @@ describe('referral pipeline with XP from mint', () => {
         authority: wallet.publicKey,
         config: configPda,
       })
-      .signers([wallet])
-      .rpc();
+      .instruction();
 
-    // C is referred by B
-    await program.methods
+    // Instruction for C is referred by B
+    const applyReferralC = await program.methods
       .applyReferral()
       .accounts({
         userAssetData: userCAcc,
@@ -154,8 +165,13 @@ describe('referral pipeline with XP from mint', () => {
         authority: wallet.publicKey,
         config: configPda,
       })
-      .signers([wallet])
-      .rpc();
+      .instruction();
+
+    const txB = new Transaction().add(computeIx, applyReferralB);
+    const txC = new Transaction().add(computeIx, applyReferralC);
+
+    await provider.sendAndConfirm(txB, [wallet]);
+    await provider.sendAndConfirm(txC, [wallet]);
 
     // Mint NFT only for userC, pass B as remaining (level 1 referrer)
     await mintSoulbound(userC, userCId, [

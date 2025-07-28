@@ -1,15 +1,7 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 
-import {
-  Keypair,
-  PublicKey,
-  sendAndConfirmTransaction,
-  SystemProgram,
-  SYSVAR_INSTRUCTIONS_PUBKEY,
-  SYSVAR_RENT_PUBKEY,
-} from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
+import { Keypair, PublicKey, sendAndConfirmTransaction, SystemProgram } from '@solana/web3.js';
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import defaultSoulboundMetadataJson from '../../../metadata/soulbound.metadata.json';
 import { PinataSDK } from 'pinata-web3';
@@ -20,6 +12,7 @@ import * as dotenv from 'dotenv';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 
 dotenv.config();
+
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT || '',
   pinataGateway: process.env.PINATA_GATEWAY || '',
@@ -33,7 +26,7 @@ describe('mint soulbound', () => {
   const connection = provider.connection;
   const program = anchor.workspace.nomadzCore as Program<NomadzCore>;
 
-  const userId = 'userB2';
+  const userId = 'userB';
   const mplCoreProgramId = new PublicKey('CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d');
 
   let wallet: Keypair;
@@ -42,15 +35,15 @@ describe('mint soulbound', () => {
   before(async () => {
     wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ''));
 
-    await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
-    await connection.requestAirdrop(user.publicKey, 1_000_000_000);
-    await new Promise(res => setTimeout(res, 1000));
+    // await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
+    // await connection.requestAirdrop(user.publicKey, 1_000_000_000);
+    // await new Promise(res => setTimeout(res, 1000));
     console.log(await connection.getBalance(user.publicKey));
     console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
   });
 
   it('Mints a soulbound NFT', async () => {
-    const configPdaStr = getAccount<string>('config_v2');
+    const configPdaStr = getAccount<string>('config');
     if (!configPdaStr) throw new Error('Missing config address');
     const configPda = new PublicKey(configPdaStr);
 

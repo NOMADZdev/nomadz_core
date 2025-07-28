@@ -2,8 +2,7 @@ import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 import { Keypair, LAMPORTS_PER_SOL, PublicKey, sendAndConfirmTransaction } from '@solana/web3.js';
 import * as assert from 'assert';
-
-import { getAccount, saveAccount } from '../../../utils/account_utils';
+import { saveAccount } from '../../../utils/account_utils';
 import { NomadzCore } from '../../../target/types/nomadz_core';
 import { BN } from 'bn.js';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
@@ -25,14 +24,14 @@ describe('update config', () => {
   before(async () => {
     wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ''));
 
-    // await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
-    // await new Promise(res => setTimeout(res, 1000));
+    await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
+    await new Promise(res => setTimeout(res, 1000));
     console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
   });
 
   it('Updates the config data', async () => {
     const [configPda] = PublicKey.findProgramAddressSync(
-      [Buffer.from('config_v2')],
+      [Buffer.from('config')],
       program.programId,
     );
 
