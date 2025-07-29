@@ -179,6 +179,7 @@ describe('update user stats with referral XP rewards', () => {
         xp: updateXP,
         level: newLevel,
         luck: newLuck,
+        updateReferralXp: true,
       })
       .accounts({
         userAssetData: accC,
@@ -200,6 +201,7 @@ describe('update user stats with referral XP rewards', () => {
         xp: updateXP,
         level: newLevel,
         luck: newLuck,
+        updateReferralXp: null,
       })
       .accounts({
         userAssetData: accF,

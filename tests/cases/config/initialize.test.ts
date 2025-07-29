@@ -2,6 +2,7 @@ import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 import * as assert from 'assert';
 import {
+  Connection,
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
@@ -12,10 +13,11 @@ import { NomadzCore } from '../../../target/types/nomadz_core';
 import { getAccount, saveAccount } from '../../../utils/account_utils';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import * as dotenv from 'dotenv';
+import { string, struct } from '@metaplex-foundation/umi/serializers';
 
 dotenv.config();
 
-describe('initialize', () => {
+describe('initialize', async () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 

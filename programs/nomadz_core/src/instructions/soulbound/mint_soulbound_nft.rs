@@ -2,6 +2,7 @@ use crate::state::soulbound::asset_data::UserAssetData;
 use crate::{ errors::MintSoulboundNftErrorCode, state::config::config::Config };
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{ transfer, Transfer };
+use mpl_core::types::PluginAuthority;
 use mpl_core::{
     instructions::CreateV2CpiBuilder,
     types::{ FreezeDelegate, Plugin, PluginAuthorityPair },
@@ -86,7 +87,7 @@ pub fn mint_soulbound_nft_handler(
         .plugins(
             vec![PluginAuthorityPair {
                 plugin: Plugin::FreezeDelegate(FreezeDelegate { frozen: true }),
-                authority: None,
+                authority: Some(PluginAuthority::Address { address: ctx.accounts.admin.key() }),
             }]
         );
 

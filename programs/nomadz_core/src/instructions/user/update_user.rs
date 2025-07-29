@@ -14,7 +14,7 @@ pub fn update_user_asset_data_handler(
         UpdateUserAssetDataErrorCode::Forbidden
     );
 
-    let UpdateUserAssetDataArgs { user_id: _, xp, level, luck } = args;
+    let UpdateUserAssetDataArgs { user_id: _, xp, level, luck, update_referral_xp } = args;
 
     let user_asset_data = &mut ctx.accounts.user_asset_data;
     let previous_xp = user_asset_data.xp;
@@ -42,7 +42,9 @@ pub fn update_user_asset_data_handler(
     let gained_xp = user_asset_data.xp.saturating_sub(previous_xp);
     msg!("Gained XP: {}", gained_xp);
 
-    if gained_xp > 0 {
+    let update_referral_xp = update_referral_xp.unwrap_or(true);
+
+    if gained_xp > 0 && update_referral_xp {
         for entry in user_asset_data.referral_history.iter() {
             msg!("Looking for level 1 referrer: {}", entry.referrer);
             let percentage = match entry.level {
@@ -83,6 +85,7 @@ pub struct UpdateUserAssetDataArgs {
     xp: Option<u64>,
     level: Option<u8>,
     luck: Option<u8>,
+    update_referral_xp: Option<bool>,
 }
 
 #[derive(Accounts)]
