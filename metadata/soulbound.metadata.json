@@ -1,7 +1,7 @@
 {
-  "name": "NOMADZ Soulbound",
-  "symbol": "NOMADZSB",
-  "description": "The NOMADZ soulbound NFT",
+  "name": "Nomad ID",
+  "symbol": "NOMADID",
+  "description": "Nomad ID",
   "image": "https://bafybeid2v2un5eziph75p4h2l3pykxnlrgde5gu6blzxs2nun5sryutmpe.ipfs.dweb.link/",
   "animation_url": "https://bafybeihvydpbj2h7qabs6fbklwnbt2ltbrekvjpqupquvizubm4xeb5nam.ipfs.dweb.link/",
   "external_url": "https://nomadz.xyz",
@@ -28,11 +28,11 @@
       "value": "0"
     },
     {
-      "traitType": "Luck",
+      "traitType": "Boost",
       "value": "0"
     },
     {
-      "traitType": "Discount",
+      "traitType": "Rank",
       "value": "0"
     }
   ]

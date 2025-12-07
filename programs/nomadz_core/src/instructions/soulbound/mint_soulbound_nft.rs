@@ -77,7 +77,7 @@ pub fn mint_soulbound_nft_handler(
     let mut builder = CreateV2CpiBuilder::new(mpl_core_program);
     let builder = builder
         .asset(&asset_account_info)
-        .name(String::from("NOMADZ Soulbound"))
+        .name(String::from("Nomad ID"))
         .uri(uri.clone())
         .authority(Some(&asset_authority_account_info))
         .payer(&payer_account_info)

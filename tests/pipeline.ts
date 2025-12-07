@@ -5,8 +5,8 @@ describe('Testing Pipeline', () => {
     // uncomment required test file
     const testFiles = [
       // config tests
-      'config/initialize.test.ts',
-      // 'config/update.test.ts',
+      // 'config/initialize.test.ts',
+      'config/update.test.ts',
 
       // referral
       // 'referral/apply_referral.test.ts',

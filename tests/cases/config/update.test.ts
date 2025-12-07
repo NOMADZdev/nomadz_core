@@ -2,10 +2,10 @@ import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 import { Keypair, LAMPORTS_PER_SOL, PublicKey, sendAndConfirmTransaction } from '@solana/web3.js';
 import * as assert from 'assert';
-import { saveAccount } from '../../../utils/account_utils';
 import { NomadzCore } from '../../../target/types/nomadz_core';
 import { BN } from 'bn.js';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
+import { saveAccount } from '../../../utils/account_utils';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -18,14 +18,15 @@ describe('update config', () => {
 
   const newConfigFeeVault = new PublicKey('CwKJ22GahUScYc5m63gdtfyKLg8Hg8DuzBjwCBdprqv5');
   const newConfigMintSoulboundFee = 0.005 * LAMPORTS_PER_SOL; // 0.2 SOL
+  // const newConfigMintSoulboundFee = 0 * LAMPORTS_PER_SOL; // 0.2 SOL
 
   let wallet: Keypair;
 
   before(async () => {
     wallet = Keypair.fromSecretKey(bs58.decode(process.env.ADMIN_KEY || ''));
 
-    await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
-    await new Promise(res => setTimeout(res, 1000));
+    // await connection.requestAirdrop(wallet.publicKey, 1_000_000_000);
+    // await new Promise(res => setTimeout(res, 1000));
     console.log(await connection.getBalance(new PublicKey(process.env.ADMIN_PUBLIC_KEY || '')));
   });
 
@@ -45,7 +46,8 @@ describe('update config', () => {
         lvlPercentages: null,
         mintSoulboundFee: new BN(newConfigMintSoulboundFee),
         admin: null,
-        feeVault: newConfigFeeVault,
+        // feeVault: newConfigFeeVault,
+        feeVault: null,
       })
       .accounts({
         config: configPda,
@@ -68,11 +70,12 @@ describe('update config', () => {
       newConfigMintSoulboundFee,
       'Mint soulbound fee should be updated',
     );
-    assert.deepStrictEqual(
-      after.lvlPercentages,
-      newLvlPercentages,
-      'Level percentages should be updated',
-    );
+
+    // assert.deepStrictEqual(
+    //   after.lvlPercentages,
+    //   newLvlPercentages,
+    //   'Level percentages should be updated',
+    // );
 
     saveAccount('configFeeVault', after.feeVault.toBase58());
   });

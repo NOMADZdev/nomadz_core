@@ -11,7 +11,7 @@ nomadz_core = "GfyUP9mziko4u381SeLBb4D2ijTH4a9ruzBiA2hQAmwr"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
+cluster = "Mainnet"
 wallet = "deploy.json"
 
 [scripts]
