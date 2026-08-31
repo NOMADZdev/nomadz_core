@@ -12,6 +12,9 @@ describe('Testing Pipeline', () => {
       // 'referral/apply_referral.test.ts',
       // 'referral/update_user.test.ts',
 
+      // user
+      // 'user/update_travel_points.test.ts',
+
       // config tests
       // 'soulbound/mint.test.ts',
       // 'soulbound/update.test.ts',
@@ -19,7 +22,7 @@ describe('Testing Pipeline', () => {
 
     for (const testFile of testFiles) {
       console.log(`Running ${testFile}...`);
-      execSync(`yarn ts-mocha -p ./tsconfig.json -t 1000000 tests/cases/${testFile}`, {
+      execSync(`pnpm ts-mocha -p ./tsconfig.json -t 1000000 tests/cases/${testFile}`, {
         stdio: 'inherit',
       });
     }

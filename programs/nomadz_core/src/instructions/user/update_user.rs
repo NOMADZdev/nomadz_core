@@ -14,7 +14,14 @@ pub fn update_user_asset_data_handler(
         UpdateUserAssetDataErrorCode::Forbidden
     );
 
-    let UpdateUserAssetDataArgs { user_id: _, xp, level, luck, update_referral_xp } = args;
+    let UpdateUserAssetDataArgs {
+        user_id: _,
+        xp,
+        level,
+        luck,
+        travel_points,
+        update_referral_xp,
+    } = args;
 
     let user_asset_data = &mut ctx.accounts.user_asset_data;
     let previous_xp = user_asset_data.xp;
@@ -31,12 +38,17 @@ pub fn update_user_asset_data_handler(
         user_asset_data.luck = new_luck;
     }
 
+    if let Some(new_travel_points) = travel_points {
+        user_asset_data.travel_points = new_travel_points;
+    }
+
     msg!(
-        "Updated user asset data account info for {}: XP={}, Level={}, Luck={}",
+        "Updated user asset data account info for {}: XP={}, Level={}, Luck={}, TravelPoints={}",
         user_asset_data.user,
         user_asset_data.xp,
         user_asset_data.level,
-        user_asset_data.luck
+        user_asset_data.luck,
+        user_asset_data.travel_points
     );
 
     let gained_xp = user_asset_data.xp.saturating_sub(previous_xp);
@@ -85,6 +97,7 @@ pub struct UpdateUserAssetDataArgs {
     xp: Option<u64>,
     level: Option<u8>,
     luck: Option<u8>,
+    travel_points: Option<u64>,
     update_referral_xp: Option<bool>,
 }
 

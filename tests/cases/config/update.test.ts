@@ -17,7 +17,8 @@ describe('update config', () => {
   const program = anchor.workspace.nomadzCore as Program<NomadzCore>;
 
   const newConfigFeeVault = new PublicKey('CwKJ22GahUScYc5m63gdtfyKLg8Hg8DuzBjwCBdprqv5');
-  const newConfigMintSoulboundFee = 0.005 * LAMPORTS_PER_SOL; // 0.2 SOL
+  const newConfigMintSoulboundFee = 0.045 * LAMPORTS_PER_SOL; // 0.045 SOL
+  // const newConfigMintSoulboundFee = 0.005 * LAMPORTS_PER_SOL; // 0.005 SOL
   // const newConfigMintSoulboundFee = 0 * LAMPORTS_PER_SOL; // 0.2 SOL
 
   let wallet: Keypair;
