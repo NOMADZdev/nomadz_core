@@ -12,13 +12,13 @@ use crate::constants::{
 use crate::errors::SoulboundErrorCode;
 use crate::state::config::config::Config;
 use crate::state::soulbound::asset_data::UserAssetData;
-use crate::utils::{ burn_with_pda, nomad_id_plugins, require_governance, set_permanent_freeze };
+use crate::utils::{ burn_with_pda, nomad_id_plugins, require_admin, set_permanent_freeze };
 
 pub fn soulbound_reissue_handler(
     ctx: Context<SoulboundReissue>,
     args: SoulboundReissueArgs
 ) -> Result<()> {
-    require_governance(&ctx.accounts.config, &ctx.accounts.governance.key())?;
+    require_admin(&ctx.accounts.config, &ctx.accounts.admin.key())?;
     require_keys_neq!(
         ctx.accounts.user_asset_data.asset,
         Pubkey::default(),
@@ -178,7 +178,7 @@ pub struct SoulboundReissue<'info> {
     #[account(seeds = [b"asset_authority", crate::ID.as_ref(), new_asset.key().as_ref()], bump)]
     pub new_asset_authority: UncheckedAccount<'info>,
 
-    pub governance: Signer<'info>,
+    pub admin: Signer<'info>,
 
     #[account(mut)]
     pub payer: Signer<'info>,

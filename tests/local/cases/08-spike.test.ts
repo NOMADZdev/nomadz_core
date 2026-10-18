@@ -722,7 +722,7 @@ describe("08 spike: raw mpl-core behaviour, transaction size and durable nonces"
 
         describe("program instructions", () => {
             let program: Program<Idl>;
-            const { admin, governance } = keys();
+            const { admin } = keys();
             const config = configPda();
 
             before(() => {
@@ -763,7 +763,7 @@ describe("08 spike: raw mpl-core behaviour, transaction size and durable nonces"
                         assetAuthority: assetAuthorityPda(current),
                         newAsset: nextAsset,
                         newAssetAuthority: assetAuthorityPda(nextAsset),
-                        governance: governance.publicKey,
+                        admin: admin.publicKey,
                         payer,
                         mplCoreProgram: MPL_CORE_PROGRAM_ID,
                         systemProgram: SYSTEM_PROGRAM_ID,
@@ -870,7 +870,7 @@ describe("08 spike: raw mpl-core behaviour, transaction size and durable nonces"
                 await ensureGovernanceSet(program);
                 const reissue = await send(
                     [await reissueIx(userId, asset, 1, reissueOwner.publicKey)],
-                    [reissueOwner, governance],
+                    [reissueOwner, admin],
                     { label: "spike soulbound_reissue v1", cu: MAX_CU },
                 );
                 recordCu(

@@ -48,7 +48,7 @@ interface UadView {
     reissueCount: number;
 }
 
-describe("05 soulbound_burn and soulbound_reissue", () => {
+describe("05 soulbound_burn (governance) and soulbound_reissue (admin + new owner)", () => {
     let program: Program<Idl>;
     const { admin, governance, attacker } = keys();
     const config = configPda();
@@ -158,7 +158,7 @@ describe("05 soulbound_burn and soulbound_reissue", () => {
                 assetAuthority: assetAuthorityPda(asset),
                 newAsset,
                 newAssetAuthority: assetAuthorityPda(newAsset),
-                governance: signer,
+                admin: signer,
                 payer,
                 mplCoreProgram: MPL_CORE_PROGRAM_ID,
                 systemProgram: SYSTEM_PROGRAM_ID,
@@ -378,7 +378,7 @@ describe("05 soulbound_burn and soulbound_reissue", () => {
             assert.equal(uad.reissueCount, 0);
         });
 
-        it("rejects the hot admin", async () => {
+        it("rejects governance signing instead of the admin", async () => {
             await expectError(
                 send(
                     [
@@ -386,14 +386,32 @@ describe("05 soulbound_burn and soulbound_reissue", () => {
                             u.userId,
                             legacyAsset,
                             gen1,
-                            admin.publicKey,
+                            governance.publicKey,
                             newWallet.publicKey,
                         ),
                     ],
-                    [admin, newWallet],
+                    [governance, newWallet],
                 ),
                 "Unauthorized",
             );
+        });
+
+        it("rejects a reissue without the new owner's signature", async () => {
+            const ix = await reissueIx(
+                u.userId,
+                legacyAsset,
+                gen1,
+                admin.publicKey,
+                newWallet.publicKey,
+            );
+            ix.keys = ix.keys.map((k) =>
+                k.pubkey.equals(newWallet.publicKey)
+                    ? { ...k, isSigner: false }
+                    : k,
+            );
+            await expectError(send([ix], [admin]), "AccountNotSigner");
+            const uad = await decodeUad(u.userId);
+            assert.ok(uad.asset.equals(legacyAsset), "u2 still holds gen 0");
         });
 
         it("rejects a random signer", async () => {
@@ -422,12 +440,12 @@ describe("05 soulbound_burn and soulbound_reissue", () => {
                             randomUserId(),
                             legacyAsset,
                             gen1,
-                            governance.publicKey,
+                            admin.publicKey,
                             newWallet.publicKey,
                             u.userId,
                         ),
                     ],
-                    [governance, newWallet],
+                    [admin, newWallet],
                 ),
                 "ConstraintSeeds",
             );
@@ -446,11 +464,11 @@ describe("05 soulbound_burn and soulbound_reissue", () => {
                                 u.userId,
                                 legacyAsset,
                                 wrong,
-                                governance.publicKey,
+                                admin.publicKey,
                                 newWallet.publicKey,
                             ),
                         ],
-                        [governance, newWallet],
+                        [admin, newWallet],
                     ),
                     "InvalidReissueAsset",
                 );
@@ -465,11 +483,11 @@ describe("05 soulbound_burn and soulbound_reissue", () => {
                         u.userId,
                         legacyAsset,
                         gen1,
-                        governance.publicKey,
+                        admin.publicKey,
                         newWallet.publicKey,
                     ),
                 ],
-                [governance, newWallet],
+                [admin, newWallet],
                 { label: "05 reissue legacy", cu: MAX_CU },
             );
             recordCu("soulbound_reissue legacy", res.unitsConsumed, res.size);
@@ -510,11 +528,11 @@ describe("05 soulbound_burn and soulbound_reissue", () => {
                             u.userId,
                             legacyAsset,
                             assetPda(u.userId, 2),
-                            governance.publicKey,
+                            admin.publicKey,
                             newWallet.publicKey,
                         ),
                     ],
-                    [governance, newWallet],
+                    [admin, newWallet],
                 ),
                 "AssetMismatch",
             );
@@ -530,11 +548,11 @@ describe("05 soulbound_burn and soulbound_reissue", () => {
                         u.userId,
                         gen1,
                         gen2,
-                        governance.publicKey,
+                        admin.publicKey,
                         nextWallet.publicKey,
                     ),
                 ],
-                [governance, nextWallet],
+                [admin, nextWallet],
                 { label: "05 reissue v1", cu: MAX_CU },
             );
             recordCu("soulbound_reissue v1", res.unitsConsumed, res.size);
@@ -557,11 +575,11 @@ describe("05 soulbound_burn and soulbound_reissue", () => {
                             u.userId,
                             gen1,
                             assetPda(u.userId, 3),
-                            governance.publicKey,
+                            admin.publicKey,
                             nextWallet.publicKey,
                         ),
                     ],
-                    [governance, nextWallet],
+                    [admin, nextWallet],
                 ),
                 "AssetMismatch",
             );
@@ -579,11 +597,11 @@ describe("05 soulbound_burn and soulbound_reissue", () => {
                         fresh.userId,
                         fresh.asset,
                         next,
-                        governance.publicKey,
+                        admin.publicKey,
                         target.publicKey,
                     ),
                 ],
-                [governance, target],
+                [admin, target],
                 { label: "05 reissue fresh v1", cu: MAX_CU },
             );
             assert.ok(isBurnedAsset(await accountData(fresh.asset)));

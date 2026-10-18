@@ -37,8 +37,8 @@ they stay with the deploy wallet.
 
 | Authority | Held by | May call |
 |---|---|---|
-| Hot admin (`config.admin`) | backend signer | `initialize_user_asset_data`, `update_user_asset_data`, `update_user_with_referrer`, `apply_referral`, `mint_soulbound_nft`, `update_soulbound_nft` (legacy), `soulbound_update`, `soulbound_transfer`, `soulbound_set_frozen` |
-| Governance (`config.governance`) | Squads vault `BUnmK1sZD6cBNfJ9uFQpWcPLon3aUHKJAHdVje7Fx8sW` | `update_config`, `soulbound_burn`, `soulbound_reissue`, `soulbound_core_passthrough` |
+| Hot admin (`config.admin`) | backend signer | `initialize_user_asset_data`, `update_user_asset_data`, `update_user_with_referrer`, `apply_referral`, `mint_soulbound_nft`, `update_soulbound_nft` (legacy), `soulbound_update`, `soulbound_transfer`, `soulbound_set_frozen`, `soulbound_reissue` (with the user's new wallet as co-signer) |
+| Governance (`config.governance`) | Squads vault `BUnmK1sZD6cBNfJ9uFQpWcPLon3aUHKJAHdVje7Fx8sW` | `update_config`, `soulbound_burn`, `soulbound_core_passthrough` |
 | Deploy wallet | the upgrade authority | program upgrade and program close, outside the program |
 
 The program charges no fees; the backend does.
@@ -49,7 +49,7 @@ The program charges no fees; the backend does.
 - `soulbound_set_frozen`: admin. Freezes or thaws a Nomad ID.
 - `soulbound_update`: admin. Updates the metadata of a Nomad ID, including while it is frozen.
 - `soulbound_burn`: governance. Burns a new-style Nomad ID.
-- `soulbound_reissue`: governance. For a new-style Nomad ID, burns it and mints the next one. For a legacy one, keeps the old asset, marks it `status=revoked` with `replaced_by`, and mints the replacement.
+- `soulbound_reissue`: hot admin plus the user's new wallet, which signs and pays. The backend gates it with a second-admin approval and a 72 hour delay; the program does not enforce either. For a new-style Nomad ID, burns it and mints the next one. For a legacy one, keeps the old asset, marks it `status=revoked` with `replaced_by`, and mints the replacement.
 - `soulbound_core_passthrough`: governance. Calls an allowlisted mpl-core instruction, signed by the asset authority PDA.
   On a frozen asset it thaws before an allowlisted plugin operation and refreezes afterwards. It
   rejects any operation on the three permanent delegates (freeze, transfer, burn) and any Add of

@@ -176,7 +176,7 @@ describe("01 governance: bootstrap, governance-only and hot-admin gates", () => 
 
     const reissueIx = async (
         userId: string,
-        signer: PublicKey,
+        adminSigner: PublicKey,
         payer: PublicKey,
     ) => {
         const uad = await decodeUad(userId);
@@ -196,7 +196,7 @@ describe("01 governance: bootstrap, governance-only and hot-admin gates", () => 
                     assetAuthority: assetAuthorityPda(asset),
                     newAsset,
                     newAssetAuthority: assetAuthorityPda(newAsset),
-                    governance: signer,
+                    admin: adminSigner,
                     payer,
                     mplCoreProgram: MPL_CORE_PROGRAM_ID,
                     systemProgram: SYSTEM_PROGRAM_ID,
@@ -236,17 +236,6 @@ describe("01 governance: bootstrap, governance-only and hot-admin gates", () => 
             "soulbound_burn",
             await burnIx(v1UserId, signer.publicKey, signer.publicKey),
             [signer],
-        ],
-        [
-            "soulbound_reissue",
-            (
-                await reissueIx(
-                    v1UserId,
-                    signer.publicKey,
-                    reissueWallet.publicKey,
-                )
-            ).ix,
-            [signer, reissueWallet],
         ],
         [
             "soulbound_core_passthrough",
@@ -315,6 +304,23 @@ describe("01 governance: bootstrap, governance-only and hot-admin gates", () => 
             const uad = await decodeUad(v1UserId);
             assert.ok((uad.asset as PublicKey).equals(assetPda(v1UserId)));
             assert.equal(uad.reissueCount, 0);
+        });
+
+        it("gates soulbound_reissue on config.admin, not on governance", async () => {
+            for (const signer of [governance, attacker]) {
+                const { ix } = await reissueIx(
+                    v1UserId,
+                    signer.publicKey,
+                    reissueWallet.publicKey,
+                );
+                await expectSoulbound(
+                    send([ix], [signer, reissueWallet], {
+                        label: "AC4 reissue by non-admin",
+                    }),
+                    "Unauthorized",
+                );
+            }
+            assert.equal((await decodeUad(v1UserId)).reissueCount, 0);
         });
 
         it("rejects update_config from a random signer and from the future governance key", async () => {
@@ -543,7 +549,7 @@ describe("01 governance: bootstrap, governance-only and hot-admin gates", () => 
             );
         });
 
-        it("accepts governance for passthrough, reissue and burn", async () => {
+        it("accepts governance for passthrough and burn, with the admin reissuing in between", async () => {
             const renamed = "Nomad ID governed";
             const pass = await send(
                 [
@@ -569,10 +575,10 @@ describe("01 governance: bootstrap, governance-only and hot-admin gates", () => 
 
             const { ix, newAsset } = await reissueIx(
                 v1UserId,
-                governance.publicKey,
+                admin.publicKey,
                 reissueWallet.publicKey,
             );
-            const reissue = await send([ix], [governance, reissueWallet], {
+            const reissue = await send([ix], [admin, reissueWallet], {
                 label: "AC6 reissue",
             });
             recordCu(
@@ -739,7 +745,7 @@ describe("01 governance: bootstrap, governance-only and hot-admin gates", () => 
             );
         });
 
-        it("soulbound_update, soulbound_transfer and soulbound_set_frozen", async () => {
+        it("soulbound_update, soulbound_transfer, soulbound_set_frozen and soulbound_reissue", async () => {
             const target = randomUserId();
             const owner = throwaway();
             const newWallet = throwaway();
@@ -806,7 +812,35 @@ describe("01 governance: bootstrap, governance-only and hot-admin gates", () => 
                     }),
                     "Unauthorized",
                 );
+                const { ix: reissue } = await reissueIx(
+                    target,
+                    signer.publicKey,
+                    newWallet.publicKey,
+                );
+                await expectSoulbound(
+                    send([reissue], [signer, newWallet], {
+                        label: `AC7 reissue by ${who}`,
+                    }),
+                    "Unauthorized",
+                );
             }
+            const { ix: unsignedReissue } = await reissueIx(
+                target,
+                admin.publicKey,
+                newWallet.publicKey,
+            );
+            unsignedReissue.keys = unsignedReissue.keys.map((k) =>
+                k.pubkey.equals(newWallet.publicKey)
+                    ? { ...k, isSigner: false }
+                    : k,
+            );
+            await expectError(
+                send([unsignedReissue], [admin], {
+                    label: "AC7 reissue without the new owner",
+                }),
+                "AccountNotSigner",
+            );
+            assert.equal((await decodeUad(target)).reissueCount, 0);
             assert.ok((await fetchData(asset)).equals(before));
             assert.ok(
                 ((await decodeUad(target)).user as PublicKey).equals(
