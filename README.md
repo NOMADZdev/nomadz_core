@@ -133,7 +133,25 @@ anchor deploy
 
 ---
 
+## Build on macOS
+
+The native macOS SDK breaks Solana's linker. Build with the 14.4 SDK:
+```bash
+SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk MACOSX_DEPLOYMENT_TARGET=14.0 \
+  ~/.avm/bin/anchor-0.29.0 build
+```
+
 ## Testing
+
+### Local harness (upgrade in place and governance)
+```bash
+bash tests/local/run.sh
+```
+It starts a local validator, deploys the previous program, upgrades it in place and runs the cases in
+`tests/local/cases`. Do not use `anchor test`: `Anchor.toml` targets Mainnet.
+
+For the authority split, the new instructions and the upgrade steps see
+[docs/program-upgrade.md](docs/program-upgrade.md).
 
 ### Localnet
 After deploying to Localnet, you can test the program with:

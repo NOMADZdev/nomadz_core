@@ -60,4 +60,46 @@ pub mod nomadz_core {
     ) -> Result<()> {
         instructions::soulbound::update_soulbound_nft::update_soulbound_nft_handler(ctx, data)
     }
+
+    pub fn soulbound_transfer(
+        ctx: Context<SoulboundTransfer>,
+        args: SoulboundTransferArgs
+    ) -> Result<()> {
+        instructions::soulbound::soulbound_transfer::soulbound_transfer_handler(ctx, args)
+    }
+
+    pub fn soulbound_set_frozen(
+        ctx: Context<SoulboundSetFrozen>,
+        args: SoulboundSetFrozenArgs
+    ) -> Result<()> {
+        instructions::soulbound::soulbound_set_frozen::soulbound_set_frozen_handler(ctx, args)
+    }
+
+    pub fn soulbound_update(
+        ctx: Context<SoulboundUpdate>,
+        args: SoulboundUpdateArgs
+    ) -> Result<()> {
+        instructions::soulbound::soulbound_update::soulbound_update_handler(ctx, args)
+    }
+
+    pub fn soulbound_burn(
+        ctx: Context<SoulboundBurn>,
+        args: SoulboundBurnArgs
+    ) -> Result<()> {
+        instructions::soulbound::soulbound_burn::soulbound_burn_handler(ctx, args)
+    }
+
+    pub fn soulbound_reissue(
+        ctx: Context<SoulboundReissue>,
+        args: SoulboundReissueArgs
+    ) -> Result<()> {
+        instructions::soulbound::soulbound_reissue::soulbound_reissue_handler(ctx, args)
+    }
+
+    pub fn soulbound_core_passthrough(
+        ctx: Context<SoulboundCorePassthrough>,
+        args: SoulboundCorePassthroughArgs
+    ) -> Result<()> {
+        instructions::soulbound::soulbound_core_passthrough::soulbound_core_passthrough_handler(ctx, args)
+    }
 }
