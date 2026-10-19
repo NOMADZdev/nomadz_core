@@ -3,15 +3,22 @@ use anchor_lang::prelude::*;
 
 pub fn update_config_handler(ctx: Context<UpdateConfig>, args: UpdateConfigArgs) -> Result<()> {
     let config = &mut ctx.accounts.config;
-    let admin = &ctx.accounts.admin;
+    let authority = &ctx.accounts.authority;
 
-    require!(admin.key() == config.admin, UpdateConfigErrorCode::InvalidAdminPubkey);
+    let expected_authority = if config.governance == Pubkey::default() {
+        config.admin
+    } else {
+        config.governance
+    };
+
+    require_keys_eq!(authority.key(), expected_authority, UpdateConfigErrorCode::Unauthorized);
 
     let UpdateConfigArgs {
         admin: new_admin,
         mint_soulbound_fee,
         lvl_percentages,
         fee_vault,
+        governance,
     } = args;
 
     if let Some(new_admin) = new_admin {
@@ -50,6 +57,28 @@ pub fn update_config_handler(ctx: Context<UpdateConfig>, args: UpdateConfigArgs)
         config.mint_soulbound_fee = new_mint_soulbound_fee;
     }
 
+    if let Some(new_governance) = governance {
+        require_keys_neq!(
+            new_governance,
+            Pubkey::default(),
+            UpdateConfigErrorCode::InvalidGovernance
+        );
+        msg!(
+            "Updated config governance account. Old governance: {:?}, new governance: {:?}",
+            config.governance,
+            new_governance
+        );
+        config.governance = new_governance;
+    }
+
+    if config.governance != Pubkey::default() {
+        require_keys_neq!(
+            config.governance,
+            config.admin,
+            UpdateConfigErrorCode::InvalidGovernance
+        );
+    }
+
     Ok(())
 }
 
@@ -59,15 +88,16 @@ pub struct UpdateConfigArgs {
     mint_soulbound_fee: Option<u64>,
     admin: Option<Pubkey>,
     fee_vault: Option<Pubkey>,
+    governance: Option<Pubkey>,
 }
 
 #[derive(Accounts)]
 #[instruction(args: UpdateConfigArgs)]
 pub struct UpdateConfig<'info> {
-    #[account(mut)]
+    #[account(mut, seeds = [b"config"], bump)]
     pub config: Account<'info, Config>,
 
-    pub admin: Signer<'info>,
+    pub authority: Signer<'info>,
 
     /// CHECK: passed explicitly and validated in logic
     pub new_admin: Option<AccountInfo<'info>>,

@@ -1,12 +1,10 @@
+use crate::constants::{ ASSET_VERSION_PROGRAM_DELEGATED, NOMAD_ID_NAME };
 use crate::state::soulbound::asset_data::UserAssetData;
+use crate::utils::nomad_id_plugins;
 use crate::{ errors::MintSoulboundNftErrorCode, state::config::config::Config };
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{ transfer, Transfer };
-use mpl_core::types::PluginAuthority;
-use mpl_core::{
-    instructions::CreateV2CpiBuilder,
-    types::{ FreezeDelegate, Plugin, PluginAuthorityPair },
-};
+use mpl_core::instructions::CreateV2CpiBuilder;
 
 pub fn mint_soulbound_nft_handler(
     ctx: Context<MintSoulboundNFT>,
@@ -32,6 +30,7 @@ pub fn mint_soulbound_nft_handler(
     let fee_vault = &ctx.accounts.fee_vault;
 
     user_asset_data.asset = asset_account.key();
+    user_asset_data.asset_version = ASSET_VERSION_PROGRAM_DELEGATED;
 
     let asset_account_info = asset_account.to_account_info();
     let asset_authority_account_info = asset_authority.to_account_info();
@@ -77,19 +76,14 @@ pub fn mint_soulbound_nft_handler(
     let mut builder = CreateV2CpiBuilder::new(mpl_core_program);
     let builder = builder
         .asset(&asset_account_info)
-        .name(String::from("Nomad ID"))
+        .name(String::from(NOMAD_ID_NAME))
         .uri(uri.clone())
         .authority(Some(&asset_authority_account_info))
         .payer(&payer_account_info)
         .owner(Some(&user_account_info))
         .update_authority(Some(&asset_authority_account_info))
         .system_program(system_program)
-        .plugins(
-            vec![PluginAuthorityPair {
-                plugin: Plugin::FreezeDelegate(FreezeDelegate { frozen: true }),
-                authority: Some(PluginAuthority::Address { address: ctx.accounts.admin.key() }),
-            }]
-        );
+        .plugins(nomad_id_plugins(asset_authority.key()));
 
     builder
         .invoke_signed(&[asset_account_seeds[0], asset_authority_seeds[0]])

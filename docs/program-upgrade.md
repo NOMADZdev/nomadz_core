@@ -27,6 +27,66 @@ The build is pinned and will fail without these. Both pins are committed:
 
 ---
 
+## What this upgrade changes
+
+This upgrade adds permanent program-held delegates on new Nomad IDs, a governance authority, and the
+`soulbound_*` instructions. The upgrade authority and close authority are not part of the program;
+they stay with the deploy wallet.
+
+### Authority split
+
+| Authority | Held by | May call |
+|---|---|---|
+| Hot admin (`config.admin`) | backend signer | `initialize_user_asset_data`, `update_user_asset_data`, `update_user_with_referrer`, `apply_referral`, `mint_soulbound_nft`, `update_soulbound_nft` (legacy), `soulbound_update`, `soulbound_transfer`, `soulbound_set_frozen`, `soulbound_reissue` (with the user's new wallet as co-signer) |
+| Governance (`config.governance`) | Squads vault `BUnmK1sZD6cBNfJ9uFQpWcPLon3aUHKJAHdVje7Fx8sW` | `update_config`, `soulbound_burn`, `soulbound_core_passthrough` |
+| Deploy wallet | the upgrade authority | program upgrade and program close, outside the program |
+
+The program charges no fees; the backend does.
+
+### New and changed instructions
+
+- `soulbound_transfer`: admin. Moves a Nomad ID to a new owner. Works on new and legacy assets.
+- `soulbound_set_frozen`: admin. Freezes or thaws a Nomad ID.
+- `soulbound_update`: admin. Updates the metadata of a Nomad ID, including while it is frozen.
+- `soulbound_burn`: governance. Burns a new-style Nomad ID.
+- `soulbound_reissue`: hot admin plus the user's new wallet, which signs and pays. The backend gates it with a second-admin approval and a 72 hour delay; the program does not enforce either. For a new-style Nomad ID, burns it and mints the next one. For a legacy one, keeps the old asset, marks it `status=revoked` with `replaced_by`, and mints the replacement.
+- `soulbound_core_passthrough`: governance. Calls an allowlisted mpl-core instruction, signed by the asset authority PDA.
+  On a frozen asset it thaws before an allowlisted plugin operation and refreezes afterwards. It
+  rejects any operation on the three permanent delegates (freeze, transfer, burn) and any Add of
+  `ImmutableMetadata` or an add-blocker plugin. The rejection returns `PassthroughPluginNotAllowed`.
+- `update_config`: the signer account is now named `authority` and there is a new last argument, `governance`. The backend IDL and any `updateConfig` caller must be regenerated.
+- `update_soulbound_nft` (legacy): now requires the trailing `config` account and checks the signer against `config.admin`.
+- `apply_referral`: a duplicate referral still returns silent success. What changed is that duplicates are now detected by comparing against the referrer's `user_asset_data` PDA.
+- `mint_soulbound_nft`: new Nomad IDs get permanent freeze, transfer and burn delegates held by the asset authority PDA.
+
+### Error codes
+
+`SoulboundErrorCode` errors have runtime codes from 7000, but the Anchor 0.29 IDL lists only one error
+enum, with codes from 6000. Clients must match errors by name, not by number.
+
+### Legacy Nomad IDs after an admin rotation
+
+Legacy Nomad IDs carry an owner-managed freeze delegate whose authority is the admin address at mint
+time. After `config.admin` is rotated, thawing a legacy asset, and so transferring it, still needs
+the signature of that original key. Keep the original admin key after any rotation.
+
+### One-time governance bootstrap
+
+`Config.governance` is unset after the upgrade. While it is unset, the hot admin may call
+`update_config` once to set it to the Squads vault; after that only governance can call it.
+
+1. Upgrade the program (steps below).
+2. Call `update_config` signed by the current `config.admin`, passing the existing config values and
+   `governance = BUnmK1sZD6cBNfJ9uFQpWcPLon3aUHKJAHdVje7Fx8sW`.
+3. Read the config account and confirm `governance` equals that address.
+4. From then on, `update_config` and the other governance instructions must be proposed and executed
+   through the Squads vault.
+
+Do this straight after the upgrade. Until it is done, the hot admin is the only authority able to set
+governance, and the governance instructions cannot run.
+
+---
+
 ## Step 1 — Pre-flight
 
 ```bash
@@ -44,8 +104,11 @@ Note the **Data Length** — you need it in step 3.
 
 ## Step 2 — Build
 
+The native macOS SDK breaks Solana's linker, so build against the 14.4 SDK:
+
 ```bash
-anchor build
+SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk MACOSX_DEPLOYMENT_TARGET=14.0 \
+  ~/.avm/bin/anchor-0.29.0 build
 
 solana address -k target/deploy/nomadz_core-keypair.json   # MUST print GfyUP9mzi...hQAmwr
 ls -l target/deploy/nomadz_core.so
@@ -54,7 +117,10 @@ ls -l target/deploy/nomadz_core.so
 If the keypair prints a different address, **stop**. Deploying would create a second program and
 orphan every existing PDA.
 
-## Step 3 — Extend the program account if the binary grew
+## Step 3 — Extend the program account only if the binary grew
+
+Compare `ls -l target/deploy/nomadz_core.so` with the **Data Length** from step 1. If the new
+binary is not larger, skip this step; no extend is needed.
 
 An upgrade cannot grow the on-chain account by itself. Compare the new `.so` size against the
 **Data Length** from step 1; if the binary is larger, extend first or the deploy fails with a bare
@@ -111,6 +177,20 @@ program permanently and cannot be undone.
 
 `target/idl/nomadz_core.json` is regenerated by the build. If the account layout or instruction set
 changed, update the copy the backend uses.
+
+---
+
+## Local test harness
+
+Run the full upgrade-in-place check on a local validator with throwaway keypairs. It never touches a
+public cluster and refuses to run if `deploy.json` exists in the worktree.
+
+```bash
+bash tests/local/run.sh
+```
+
+Set `SKIP_BUILD=1` to reuse an existing build. The script sets `COPYFILE_DISABLE=1` itself (macOS tar otherwise adds files that corrupt the ledger) and loads the program account pre-padded, so the upgrade-in-place needs no extend. Do not use `anchor test`: `Anchor.toml` targets
+Mainnet. Run it alone, with nothing else listening on ports 8899, 8900 and 9900.
 
 ---
 

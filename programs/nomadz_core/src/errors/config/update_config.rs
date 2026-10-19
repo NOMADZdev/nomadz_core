@@ -6,4 +6,8 @@ pub enum UpdateConfigErrorCode {
     InvalidAdminPubkey,
     #[msg("Unknown error has occured while updating config")]
     UnknownError,
+    #[msg("Only the governance authority, or the config admin before governance is set, can update config")]
+    Unauthorized,
+    #[msg("Governance must be a non-default pubkey that differs from the config admin")]
+    InvalidGovernance,
 }

@@ -2,11 +2,18 @@ use anchor_lang::prelude::*;
 use mpl_core::instructions::UpdateV2CpiBuilder;
 
 use crate::errors::UpdateSoulboundNftErrorCode;
+use crate::state::config::config::Config;
 
 pub fn update_soulbound_nft_handler(
     ctx: Context<UpdateSoulboundNFT>,
     args: UpdateSoulboundNFTArgs
 ) -> Result<()> {
+    require_keys_eq!(
+        ctx.accounts.admin.key(),
+        ctx.accounts.config.admin,
+        UpdateSoulboundNftErrorCode::Unauthorized
+    );
+
     let UpdateSoulboundNFTArgs { new_uri, user_id } = args;
 
     let asset_account = &ctx.accounts.asset_account;
@@ -94,4 +101,7 @@ pub struct UpdateSoulboundNFT<'info> {
 
     #[account(address = solana_program::system_program::ID)]
     pub system_program: Program<'info, System>,
+
+    #[account(seeds = [b"config"], bump)]
+    pub config: Account<'info, Config>,
 }

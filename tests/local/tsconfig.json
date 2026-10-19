@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["mocha", "node"],
+    "typeRoots": ["../../node_modules/@types"],
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["./**/*.ts"]
+}

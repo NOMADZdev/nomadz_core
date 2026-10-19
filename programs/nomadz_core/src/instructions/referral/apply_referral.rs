@@ -17,7 +17,7 @@ pub fn apply_referral_handler(ctx: Context<ApplyReferral>) -> Result<()> {
     if
         user_asset_data.referral_history
             .iter()
-            .any(|entry| entry.referrer == referrer_asset_data.user)
+            .any(|entry| entry.referrer == referrer_asset_data.key())
     {
         msg!("User already referred by this account");
         return Ok(());
